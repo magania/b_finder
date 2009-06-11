@@ -16,6 +16,11 @@ PhiFinder::PhiFinder(TTree &tree) :
 	index = -1;
 	tree.Branch("phi_index", &index, "phi_index/D");
 	tree.Branch("phi_mass", &masa, "phi_mass/D");
+
+	tree.Branch("k_leading_pt", &k_leading_pt, "k_leading_pt/D");
+	tree.Branch("k_trailing_pt", &k_trailing_pt, "k_trailing_pt/D");
+	tree.Branch("k_leading_ptot", &k_leading_ptot, "k_leading_ptot/D");
+	tree.Branch("k_trailing_ptot", &k_trailing_ptot, "k_trailing_ptot/D");
 }
 
 PhiFinder::~PhiFinder() {
@@ -122,4 +127,18 @@ void PhiFinder::fill(){
 	phi_saver.fill(getPhi());
 	vrt_saver.fill(getVrt());
 	masa = getMass();
+	if (getKPlus().pt() > getKMinus().pt()){
+		k_leading_pt = getKPlus().pt();
+		k_trailing_pt = getKMinus().pt();
+	} else {
+		k_leading_pt = getKMinus().pt();
+		k_trailing_pt = getKPlus().pt();
+	}
+	if (getKPlus().ptot() > getKMinus().ptot()){
+		k_leading_ptot = getKPlus().ptot();
+		k_trailing_ptot = getKMinus().ptot();
+	} else {
+		k_leading_ptot = getKMinus().ptot();
+		k_trailing_ptot = getKPlus().ptot();
+	}
 }

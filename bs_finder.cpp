@@ -36,11 +36,14 @@
 #include <TFile.h>
 #include <TVector3.h>
 #include <TMatrixD.h>
+#include "TLorentzRotation.h"
 
 using namespace std;
 using namespace AA;
 
-double BS_PDG_MASS = 5.36636;
+double PDG_BS_MASS = 5.36636;
+double PDG_KAON_MASS = 0.493677;
+double PDG_MU_MASS = 0.1056583668;
 
 double MASS_BS_MIN = 5.0;
 double MASS_BS_MAX = 5.8;
@@ -155,8 +158,63 @@ void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M,
 	double sLxy2 = SL(0, 0) + SL(1, 1);
 
 	cterr = (double) fabs(lf) * sqrt(sLxy2);
-
 }
+
+/* -- Legendary threeAngles function:
+ * mu_p: positive muon
+ * mu_n: negative muon
+ * K_p : positive Kaon
+ * K_n : negative Kaon
+ *
+ * w1 = phi, w2 = cos(theta), w3 = cos(psi)
+ *
+ */
+void threeAngles(TLorentzVector mu_p,
+		TLorentzVector mu_n,
+		TLorentzVector K_p,
+		TLorentzVector K_n,
+		Double_t &w1,Double_t &w2,Double_t &w3){
+  //--> Jpsi
+  TLorentzVector Jpsi = mu_p; Jpsi+=mu_n;
+  //--> Phi
+  TLorentzVector Phi = K_p; Phi+=K_n;
+
+  //--> Copies to be use later
+  TLorentzVector Jpsi_r = Jpsi;
+  TLorentzVector K_p_r = K_p;
+
+  //--> Defining variables
+
+  TVector3 pPhi3  = Phi.BoostVector(); // velocity of phi
+  TVector3 pJpsi3  = Jpsi.BoostVector(); // velocity of phi
+
+  Phi.Boost(-pJpsi3);
+  K_p.Boost(-pJpsi3);
+  mu_p.Boost(-pJpsi3);
+
+  TVector3 xv = Phi.Vect().Unit();
+  TVector3 pKpos = K_p.Vect().Unit();
+  Double_t xv_dot_pKpos = xv.Dot(pKpos);
+  TVector3 yv_tmp;  yv_tmp.SetXYZ(pKpos.X() - xv_dot_pKpos*xv.X(),pKpos.Y() - xv_dot_pKpos*xv.Y(),pKpos.Z() - xv_dot_pKpos*xv.Z());
+  TVector3 yv = yv_tmp.Unit();
+  TVector3 zv = xv.Cross(yv);
+  TVector3 plpos = mu_p.Vect().Unit();
+
+  Double_t sintheta_cospsi = plpos.Dot(xv);
+  Double_t sintheta_sinpsi = plpos.Dot(yv);
+
+  w1 = TMath::ATan2(sintheta_sinpsi,sintheta_cospsi);
+  w2 = plpos.Dot(zv);
+
+  K_p_r.Boost(-pPhi3);
+  Jpsi_r.Boost(-pPhi3);
+  TVector3 pKpos_r = K_p_r.Vect().Unit();
+  TVector3 pJpsi_r = Jpsi_r.Vect().Unit();
+
+  w3 = -pKpos_r.Dot(pJpsi_r);
+  return;
+}
+
 
 void params() {
 	//Parameters for Real Data and MC
@@ -256,12 +314,17 @@ int main(int argc, char** argv) {
 	double bs_mass, bs_mass_error, bs_lhtag, bs_pdl, bs_epdl;
 	double bs_iso, bs_iso_drmax, bs_iso_75;
 	double bs_jpsikp_chi2, bs_jpsikm_chi2;
+	double bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi;
 
 	tree.Branch("bs_mass", &bs_mass, "bs_mass/D");
 	tree.Branch("bs_mass_error", &bs_mass_error, "bs_mass_error/D");
 	tree.Branch("bs_lhtag", &bs_lhtag, "bs_lhtag/D");
 	tree.Branch("bs_pdl", &bs_pdl, "bs_pdl/D");
 	tree.Branch("bs_epdl", &bs_epdl, "bs_epdl/D");
+
+	tree.Branch("bs_angle_phi", &bs_angle_phi, "bs_angle_phi/D");
+	tree.Branch("bs_angle_ctheta", &bs_angle_ctheta, "bs_angle_ctheta/D");
+	tree.Branch("bs_angle_cpsi", &bs_angle_cpsi, "bs_angle_cpsi/D");
 
 	tree.Branch("bs_iso", &bs_iso, "bs_iso/D");
 	tree.Branch("bs_iso_drmax", &bs_iso_drmax, "bs_iso_drmax/D");
@@ -419,7 +482,7 @@ int main(int argc, char** argv) {
 				bs_mass_error = emb;
 
 				/* -- lifetime & lifetime_error -- */
-				v0_lifetime(&b, b_pv, &b_vrt, BS_PDG_MASS, bs_pdl, bs_epdl);
+				v0_lifetime(&b, b_pv, &b_vrt, PDG_BS_MASS, bs_pdl, bs_epdl);
 
 				/* -- Calculate isolation of B -- */
 				const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
@@ -459,6 +522,15 @@ int main(int argc, char** argv) {
 				/* -- Intermediate vertex chi2 -- */
 				bs_jpsikp_chi2 = jpsi_kp_vrt.chi2();
 				bs_jpsikm_chi2 = jpsi_km_vrt.chi2();
+
+				/* -- Transversity Angles -- */
+				double w1, w2, w3;
+				TLorentzVector l_kplus, l_kminus, l_muplus, l_muminus;
+				l_kplus.SetPtEtaPhiM  (kplus->pt(),   kplus->eta(),   kplus->phi(),   PDG_KAON_MASS);
+				l_kminus.SetPtEtaPhiM (kminus->pt(),  kminus->eta(),  kminus->phi(),  PDG_KAON_MASS);
+				l_muplus.SetPtEtaPhiM (muplus->pt(),  muplus->eta(),  muplus->phi(),  PDG_MU_MASS);
+				l_muminus.SetPtEtaPhiM(muminus->pt(), muminus->eta(), muminus->phi(), PDG_MU_MASS);
+				threeAngles(l_muplus, l_muminus, l_kplus, l_kminus, bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi);
 				/* --------------------- /savers ------------------------*/
 				tree.Fill();   // FILL
 			}

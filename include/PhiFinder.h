@@ -44,6 +44,8 @@ private:
 	void clean();
 
 	double masa;
+	double k_leading_pt, k_trailing_pt;
+	double k_leading_ptot, k_trailing_ptot;
 
 	PtlSaver k_plus_saver, k_minus_saver, phi_saver;
 	VrtSaver vrt_saver;

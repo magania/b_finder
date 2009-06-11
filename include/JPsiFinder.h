@@ -38,9 +38,12 @@ public:
 private:
 	void clean();
 
-        double tree_jpsi_mass;
+    double tree_jpsi_mass;
 	PtlSaver mu_plus_saver, mu_minus_saver, jpsi_saver;
-        VrtSaver vrt_saver;
+    VrtSaver vrt_saver;
+
+    double mu_leading_pt, mu_trailing_pt;
+    double mu_leading_ptot, mu_trailing_ptot;
 
 	std::vector<AA::Ptl*> jpsi, mu_plus, mu_minus;
 	std::vector<double> jpsi_mass;

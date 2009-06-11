@@ -18,6 +18,11 @@ JPsiFinder::JPsiFinder(TTree &tree) :
 	index = -1;
 	tree.Branch("jpsi_mass", &tree_jpsi_mass, "jpsi_mass/D");
 	tree.Branch("jpsi_index", &index, "jpsi_index/D");
+
+	tree.Branch("mu_leading_pt", &mu_leading_pt, "mu_leading_pt/D");
+	tree.Branch("mu_trailing_pt", &mu_trailing_pt, "mu_trailing_pt/D");
+	tree.Branch("mu_leading_ptot", &mu_leading_ptot, "mu_leading_ptot/D");
+	tree.Branch("mu_trailing_ptot", &mu_trailing_ptot, "mu_trailing_ptot/D");
 }
 
 JPsiFinder::~JPsiFinder() {
@@ -102,4 +107,19 @@ void JPsiFinder::fill(){
 	jpsi_saver.fill(getJPsi());
 	tree_jpsi_mass = getMass();
 	vrt_saver.fill(*getJPsi().decayVertex());
+
+	if (getMuPlus().pt() > getMuMinus().pt()){
+		mu_leading_pt = getMuPlus().pt();
+		mu_trailing_pt = getMuMinus().pt();
+	} else {
+		mu_leading_pt = getMuMinus().pt();
+		mu_trailing_pt = getMuPlus().pt();
+	}
+	if (getMuPlus().ptot() > getMuMinus().ptot()){
+		mu_leading_ptot = getMuPlus().ptot();
+		mu_trailing_ptot = getMuMinus().ptot();
+	} else {
+		mu_leading_ptot = getMuMinus().ptot();
+		mu_trailing_ptot = getMuPlus().ptot();
+	}
 }
