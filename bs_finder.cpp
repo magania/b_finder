@@ -48,24 +48,22 @@ double PDG_MU_MASS = 0.1056583668;
 double MASS_BS_MIN = 5.0;
 double MASS_BS_MAX = 5.8;
 
-void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M,
-		double &ct, double &cterr) {
-	//This function is to compute the lifetime and its error
-	//using the transversal decay length and the and alternative
-	//vertex like jpsi-vertex
-
-	/* double lv,vlv;
-	 decay ->distance(pv,lv,vlv);
-	 double lxy, vlxy;
-	 decay->distanceXY(pv,lxy,vlxy); */
+/* This function is to compute the lifetime and its error
+ * using the transversal decay length and the and alternative
+ * vertex like jpsi-vertex
+ */
+void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M, double &ct, double &cterr) {
+	HepVector pv_correction(3);
+	HepSymMatrix pv_ecorrection(3);
+//	(const_cast<Vrt*>(pv))->exclude(*(particle->children()),pv_correction,pv_ecorrection);
 
 	ct = 0;
 	cterr = 0;
 
 	TVector3 d;
-	double x1 = pv->x(1);
+	double x1 = pv->x(1);// + pv_correction(1);
 	double x2 = decay->x(1);
-	double y1 = pv->x(2);
+	double y1 = pv->x(2);// + pv_correction(2);
 	double y2 = decay->x(2);
 	d.SetXYZ(x2 - x1, y2 - y1, (double) 0.0);
 
@@ -76,9 +74,9 @@ void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M,
 	VSV(1, 0) = VSV(0, 1);
 
 	TMatrixD VPV(2, 2);
-	VPV(0, 0) = pv->v(1, 1);
-	VPV(1, 1) = pv->v(2, 2);
-	VPV(0, 1) = pv->v(1, 2);
+	VPV(0, 0) = pv->v(1, 1);// + pv_ecorrection(1,1);
+	VPV(1, 1) = pv->v(2, 2);// + pv_ecorrection(2,2);
+	VPV(0, 1) = pv->v(1, 2);// + pv_ecorrection(1,2);
 	VPV(1, 0) = VPV(0, 1);
 
 	TMatrixD VL(2, 2);
@@ -451,6 +449,18 @@ int main(int argc, char** argv) {
 			    /* -- cut on B mass -- */
 			    if ( mb < MASS_BS_MIN || MASS_BS_MAX < mb)
 			  	  continue;
+
+			    /* Momentum of decay products and uncertainty
+			     * (taking into account the applied constraints)
+			     * The order of particles is:
+			     * moms[0] - mu+
+			     * moms[1] - mu-
+			     * moms[2] - K+
+			     * moms[3] - K-
+			     */
+			    vector<HepVector> moms;
+			    vector<HepSymMatrix> vmoms;
+			    if(!b.momChildren(moms,vmoms)) continue;
 				/* ---------------- /Selection ------------- */
 			    /* Selection generate this variables:
 			     * Vrt jpsi_kp_vrt        JPsi + K+ vertex
@@ -526,11 +536,27 @@ int main(int argc, char** argv) {
 				/* -- Transversity Angles -- */
 				double w1, w2, w3;
 				TLorentzVector l_kplus, l_kminus, l_muplus, l_muminus;
-				l_kplus.SetPtEtaPhiM  (kplus->pt(),   kplus->eta(),   kplus->phi(),   PDG_KAON_MASS);
-				l_kminus.SetPtEtaPhiM (kminus->pt(),  kminus->eta(),  kminus->phi(),  PDG_KAON_MASS);
 				l_muplus.SetPtEtaPhiM (muplus->pt(),  muplus->eta(),  muplus->phi(),  PDG_MU_MASS);
 				l_muminus.SetPtEtaPhiM(muminus->pt(), muminus->eta(), muminus->phi(), PDG_MU_MASS);
+				l_kplus.SetPtEtaPhiM  (kplus->pt(),   kplus->eta(),   kplus->phi(),   PDG_KAON_MASS);
+				l_kminus.SetPtEtaPhiM (kminus->pt(),  kminus->eta(),  kminus->phi(),  PDG_KAON_MASS);
+
+				TLorentzVector x_kplus, x_kminus, x_muplus, x_muminus;
+				x_muplus.SetXYZM (moms[0](1), moms[0](2),moms[0](3), PDG_MU_MASS);
+				x_muminus.SetXYZM(moms[1](1), moms[1](2),moms[1](3), PDG_MU_MASS);
+				x_kplus.SetXYZM  (moms[2](1), moms[2](2), moms[2](3),PDG_KAON_MASS);
+				x_kminus.SetXYZM (moms[3](1), moms[3](2), moms[3](3),PDG_KAON_MASS);
+
+				cout << "Angles Test: " << endl;
+				cout << moms[0];
+//				cout << l_kminus;
+				//cout << x_kplus;
+				//cout << x_kminus;
+
 				threeAngles(l_muplus, l_muminus, l_kplus, l_kminus, bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi);
+				cout << bs_angle_phi << ' ' << bs_angle_ctheta << ' ' << bs_angle_cpsi << endl;
+				threeAngles(x_muplus, x_muminus, x_kplus, x_kminus, bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi);
+				cout << bs_angle_phi << ' ' << bs_angle_ctheta << ' ' << bs_angle_cpsi << endl;
 				/* --------------------- /savers ------------------------*/
 				tree.Fill();   // FILL
 			}
