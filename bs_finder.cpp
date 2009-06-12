@@ -53,17 +53,17 @@ double MASS_BS_MAX = 5.8;
  * vertex like jpsi-vertex
  */
 void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M, double &ct, double &cterr) {
-	HepVector pv_correction(3);
-	HepSymMatrix pv_ecorrection(3);
+	HepVector pv_correct(3);
+	HepSymMatrix pv_vcorrect(3);
 //	(const_cast<Vrt*>(pv))->exclude(*(particle->children()),pv_correction,pv_ecorrection);
 
 	ct = 0;
 	cterr = 0;
 
 	TVector3 d;
-	double x1 = pv->x(1);// + pv_correction(1);
+	double x1 = pv->x(1);//pv_correct(1);
 	double x2 = decay->x(1);
-	double y1 = pv->x(2);// + pv_correction(2);
+	double y1 = pv->x(2);// pv_correct(2);
 	double y2 = decay->x(2);
 	d.SetXYZ(x2 - x1, y2 - y1, (double) 0.0);
 
@@ -74,9 +74,9 @@ void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M, double &ct,
 	VSV(1, 0) = VSV(0, 1);
 
 	TMatrixD VPV(2, 2);
-	VPV(0, 0) = pv->v(1, 1);// + pv_ecorrection(1,1);
-	VPV(1, 1) = pv->v(2, 2);// + pv_ecorrection(2,2);
-	VPV(0, 1) = pv->v(1, 2);// + pv_ecorrection(1,2);
+	VPV(0, 0) = pv->v(1, 1);// pv_vcorrect(1,1);
+	VPV(1, 1) = pv->v(2, 2);// pv_vcorrect(2,2);
+	VPV(0, 1) = pv->v(1, 2);// pv_vcorrect(1,2);
 	VPV(1, 0) = VPV(0, 1);
 
 	TMatrixD VL(2, 2);
@@ -493,6 +493,15 @@ int main(int argc, char** argv) {
 
 				/* -- lifetime & lifetime_error -- */
 				v0_lifetime(&b, b_pv, &b_vrt, PDG_BS_MASS, bs_pdl, bs_epdl);
+				cout << "pdl good error: " << bs_pdl << ' ' << bs_epdl;
+
+				b.decayLengthXYExclusive(&particle_list,bs_pdl,bs_epdl);
+				bs_epdl = sqrt(fabs(bs_epdl));
+				cout << "pdl exclude bad error : " << bs_pdl << ' ' << bs_epdl;
+
+				b.pdl(&particle_list,bs_pdl,bs_epdl);
+				bs_epdl = sqrt(fabs(bs_epdl));
+				cout << "pdl exclude good error : " << bs_pdl << ' ' << bs_epdl;
 
 				/* -- Calculate isolation of B -- */
 				const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
@@ -534,29 +543,13 @@ int main(int argc, char** argv) {
 				bs_jpsikm_chi2 = jpsi_km_vrt.chi2();
 
 				/* -- Transversity Angles -- */
-				double w1, w2, w3;
 				TLorentzVector l_kplus, l_kminus, l_muplus, l_muminus;
-				l_muplus.SetPtEtaPhiM (muplus->pt(),  muplus->eta(),  muplus->phi(),  PDG_MU_MASS);
-				l_muminus.SetPtEtaPhiM(muminus->pt(), muminus->eta(), muminus->phi(), PDG_MU_MASS);
-				l_kplus.SetPtEtaPhiM  (kplus->pt(),   kplus->eta(),   kplus->phi(),   PDG_KAON_MASS);
-				l_kminus.SetPtEtaPhiM (kminus->pt(),  kminus->eta(),  kminus->phi(),  PDG_KAON_MASS);
-
-				TLorentzVector x_kplus, x_kminus, x_muplus, x_muminus;
-				x_muplus.SetXYZM (moms[0](1), moms[0](2),moms[0](3), PDG_MU_MASS);
-				x_muminus.SetXYZM(moms[1](1), moms[1](2),moms[1](3), PDG_MU_MASS);
-				x_kplus.SetXYZM  (moms[2](1), moms[2](2), moms[2](3),PDG_KAON_MASS);
-				x_kminus.SetXYZM (moms[3](1), moms[3](2), moms[3](3),PDG_KAON_MASS);
-
-				cout << "Angles Test: " << endl;
-				cout << moms[0];
-//				cout << l_kminus;
-				//cout << x_kplus;
-				//cout << x_kminus;
+				l_muplus.SetXYZM (moms[0](1), moms[0](2), moms[0](3), PDG_MU_MASS);
+				l_muminus.SetXYZM(moms[1](1), moms[1](2), moms[1](3), PDG_MU_MASS);
+				l_kplus.SetXYZM  (moms[2](1), moms[2](2), moms[2](3), PDG_KAON_MASS);
+				l_kminus.SetXYZM (moms[3](1), moms[3](2), moms[3](3), PDG_KAON_MASS);
 
 				threeAngles(l_muplus, l_muminus, l_kplus, l_kminus, bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi);
-				cout << bs_angle_phi << ' ' << bs_angle_ctheta << ' ' << bs_angle_cpsi << endl;
-				threeAngles(x_muplus, x_muminus, x_kplus, x_kminus, bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi);
-				cout << bs_angle_phi << ' ' << bs_angle_ctheta << ' ' << bs_angle_cpsi << endl;
 				/* --------------------- /savers ------------------------*/
 				tree.Fill();   // FILL
 			}
