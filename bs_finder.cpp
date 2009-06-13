@@ -48,115 +48,93 @@ double PDG_MU_MASS = 0.1056583668;
 double MASS_BS_MIN = 5.0;
 double MASS_BS_MAX = 5.8;
 
-/* This function is to compute the lifetime and its error
- * using the transversal decay length and the and alternative
- * vertex like jpsi-vertex
- */
-void v0_lifetime(Ptl* particle, Vrt* pv, const Vrt* decay, double M, double &ct, double &cterr) {
-	HepVector pv_correct(3);
-	HepSymMatrix pv_vcorrect(3);
-//	(const_cast<Vrt*>(pv))->exclude(*(particle->children()),pv_correction,pv_ecorrection);
+/*
+Ptl.hpp
+bool pdl(PtlLst* plst, double& pdl, double& epdl);
 
-	ct = 0;
-	cterr = 0;
+Ptl.cpp
+bool AA::Ptl::pdl(PtlLst* plst, double mass, double& pdl, double& e_pdl){
+  //Exclude all particles in the list plst from the primary vertex
+  //and compute the resulting decay length
 
-	TVector3 d;
-	double x1 = pv->x(1);//pv_correct(1);
-	double x2 = decay->x(1);
-	double y1 = pv->x(2);// pv_correct(2);
-	double y2 = decay->x(2);
-	d.SetXYZ(x2 - x1, y2 - y1, (double) 0.0);
+  if(_pvp == 0) return false;
+  if(_pve == 0) return false;
 
-	TMatrixD VSV(2, 2);
-	VSV(0, 0) = decay->v(1, 1);
-	VSV(1, 1) = decay->v(2, 2);
-	VSV(0, 1) = decay->v(1, 2);
-	VSV(1, 0) = VSV(0, 1);
+  //Create list of chains to be excluded
+  list<const Chain*> lpch;
+  for(PtlLstIt p = plst->begin(); p != plst->end(); ++p){
+    lpch.push_back((*p)->chain());
+  }
+  HepVector x(3);
+  HepSymMatrix vx(3);
+  (const_cast<Vrt*>(_pvp))->exclude(lpch,x,vx);
 
-	TMatrixD VPV(2, 2);
-	VPV(0, 0) = pv->v(1, 1);// pv_vcorrect(1,1);
-	VPV(1, 1) = pv->v(2, 2);// pv_vcorrect(2,2);
-	VPV(0, 1) = pv->v(1, 2);// pv_vcorrect(1,2);
-	VPV(1, 0) = VPV(0, 1);
 
-	TMatrixD VL(2, 2);
-	VL = VSV;
-	VL += VPV;
+  HepVector P(2);
+  HepSymMatrix VP(2);
+  P(1) = _mom(1); P(2) = _mom(2);
+  VP(1,1) = _vmom(1,1);  VP(1,2) = _vmom(1,2);
+  VP(2,2) = _vmom(2,2);
 
-	TVector3 p;
-	double px = particle->mom(1);
-	double py = particle->mom(2);
-	p.SetXYZ(px, py, (double) 0.0);
+  HepVector PV(2);
+  HepSymMatrix VPV(2);
+  PV(1) = x(1); PV(2) = x(2);
+  VPV(1,1) = vx(1,1);  VPV(1,2) = vx(1,2);
+  VPV(2,2) = vx(2,2);
 
-	TMatrixD VP(2, 2);
-	VP(0, 0) = particle->vmom(1, 1);
-	VP(1, 1) = particle->vmom(2, 2);
-	VP(0, 1) = particle->vmom(1, 2);
-	VP(1, 0) = VP(0, 1);
+  HepVector SV(2);
+  HepSymMatrix VSV(2);
+  if(!_cnsApplied) {
+     SV(1) = _pve->x(1);  SV(2) = _pve->x(2);
+     VSV(1,1) = _pve->v(1,1);  VSV(1,2) = _pve->v(1,2);
+     VSV(2,2) = _pve->v(2,2);
+  } else {
+     SV(1) = _cns(1);  SV(2) = _cns(2);
+     VSV(1,1) = _vCns(1,1);  VSV(1,2) = _vCns(1,2);
+     VSV(2,2) = _vCns(2,2);
+  }
 
-	double Lxy = d.Dot(p) / p.Mag();
-	double lf = Lxy * M / p.Mag();
-	ct = lf;
+  HepVector L(2);
+  L = SV - PV;
+  double lxy = dot(L,P)/P.norm();
+  pdl = lxy*mass/P.norm();
 
-	//Now we compute the error:
-	// Ref. Eduard's note about the errors
+ / * Aij = PiPj/p2
+   * Bij = LiLj/Lxy2 (Li = SVi - PVi)
+   * EPij = Vij(P)/p2
+   * ELij = Vij(L)/Lxy^2;
+   * Cij = LiPj/(pLxy)
+   * /
 
-	//computing Mass error
-	double sM2 = 0; //We assume 0 for now
+  HepSymMatrix VL(2);
+  VL = VSV + VPV;
 
-	//computing Lxy error
+  HepSymMatrix A(2), B(2), EP(2), EL(2);
+  HepMatrix C(2,2);
+  double p2 = P.norm()*P.norm();
+  A(1,1) = P(1)*P(1)/p2;  A(1,2) = P(1)*P(2)/p2;
+  A(2,2) = P(2)*P(2)/p2;
 
-	//Defining Matrix:
-	TMatrixD A(2, 2);
-	TMatrixD B(2, 2);
-	TMatrixD C(2, 2);
-	TMatrixD EP(2, 2);
-	TMatrixD EL(2, 2);
+  double lxy2 = lxy*lxy;
+  B(1,1) = L(1)*L(1)/lxy2;  B(1,2) = L(1)*L(2)/lxy2;
+  B(2,2) = L(2)*L(2)/lxy2;
 
-	//Aij = PiPj/p2
-	//Bij = LiLj/Lxy2 (Li = SVi - PVi)
-	//EPij = Vij(P)/p2
-	//ELij = Vij(L)/Lxy^2;
-	//Cij = LiPj/(pLxy)
+  double plxy = P.norm()*lxy;
+  C(1,1) = L(1)*P(1)/plxy;  C(1,2) = L(1)*P(2)/plxy;
+  C(2,1) = L(2)*P(1)/plxy;  C(2,2) = L(2)*P(2)/plxy;
 
-	A(0, 0) = p.X() * p.X() / p.Mag2();
-	A(1, 1) = p.Y() * p.Y() / p.Mag2();
-	A(0, 1) = p.X() * p.Y() / p.Mag2();
-	A(1, 0) = A(0, 1);
+  EP = VP/p2;
+  EL = VL/lxy2;
 
-	B(0, 0) = d.X() * d.X() / (Lxy * Lxy);
-	B(1, 1) = d.Y() * d.Y() / (Lxy * Lxy);
-	B(0, 1) = d.X() * d.Y() / (Lxy * Lxy);
-	B(1, 0) = B(0, 1);
-
-	C(0, 0) = d.X() * p.X() / (Lxy * p.Mag());
-	C(1, 1) = d.Y() * p.Y() / (Lxy * p.Mag());
-	C(0, 1) = d.X() * p.Y() / (Lxy * p.Mag());
-	C(1, 0) = d.Y() * p.X() / (Lxy * p.Mag());
-
-	EP = VP;
-	EP *= ((double) 1.0 / p.Mag2());
-	EL = VL;
-	EL *= ((double) 1.0 / (Lxy * Lxy));
-
-	//Computing Sigma Lxy
-	// Sigma Lxy^2 = Tr{A*EL + (B + 4*A - 4*C)*E}
-
-	TMatrixD A1 = A;
-	A1 *= (double) 4.0;
-	A1 += B;
-	TMatrixD C1 = C;
-	C1 *= (double) 4.0;
-	A1 -= C1;
-
-	TMatrixD A_EL(A, TMatrixD::kMult, EL);
-	TMatrixD A1_EP(A1, TMatrixD::kMult, EP);
-	TMatrixD SL = A_EL;
-	SL += A1_EP;
-	double sLxy2 = SL(0, 0) + SL(1, 1);
-
-	cterr = (double) fabs(lf) * sqrt(sLxy2);
+        //Computing Sigma Lxy
+        // Sigma Lxy^2 = Tr{A*EL + (B + 4*A - 4*C)*E}
+  HepMatrix SL(2,2);
+  SL = A*EL + (B + 4*A - 4*C)*EP;
+  e_pdl = fabs(pdl) * sqrt(SL(1,1)+SL(2,2));
+  return true;
 }
+
+ */
 
 /* -- Legendary threeAngles function:
  * mu_p: positive muon
@@ -492,16 +470,7 @@ int main(int argc, char** argv) {
 				bs_mass_error = emb;
 
 				/* -- lifetime & lifetime_error -- */
-				v0_lifetime(&b, b_pv, &b_vrt, PDG_BS_MASS, bs_pdl, bs_epdl);
-				cout << "pdl good error: " << bs_pdl << ' ' << bs_epdl;
-
-				b.decayLengthXYExclusive(&particle_list,bs_pdl,bs_epdl);
-				bs_epdl = sqrt(fabs(bs_epdl));
-				cout << "pdl exclude bad error : " << bs_pdl << ' ' << bs_epdl;
-
-				b.pdl(&particle_list,bs_pdl,bs_epdl);
-				bs_epdl = sqrt(fabs(bs_epdl));
-				cout << "pdl exclude good error : " << bs_pdl << ' ' << bs_epdl;
+				b.pdl(&particle_list, PDG_BS_MASS, bs_pdl, bs_epdl);
 
 				/* -- Calculate isolation of B -- */
 				const AA::PtlLst* ptl_lst = AA::ptlBox.particles();

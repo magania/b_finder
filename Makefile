@@ -1,5 +1,5 @@
 #----------------- aatrack ---------------
-AA=/home/magania/src32/aatrack/AA
+AA=/home/magania/test/aa_p21/AA
 AA17=/home/magania/local/aatrack/aa_p17/AA
 AA20=/home/magania/local/aatrack/aa_p20/AA
 AA21=/home/magania/local/aatrack/aa_p21/AA
