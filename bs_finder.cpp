@@ -5,6 +5,7 @@
  *      Author: magania
  */
 
+#include <BsJPsiPhiMCFinder.h>
 #include <EvtSaver.h>
 #include <PtlSaver.h>
 #include <VrtSaver.h>
@@ -189,6 +190,9 @@ int main(int argc, char** argv) {
 	/* -- We will save all in this tree --*/
 	TFile root_file("bs.root", "RECREATE");
 	TTree tree("tree", "all info.");
+#ifdef MC
+	TTree treeMC("treeMC", "all mc info.");
+#endif
 
 	/* -- Savers: Ricardo classes that save pretty much all :) -- */
 	EvtSaver evt_saver(tree);
@@ -197,6 +201,9 @@ int main(int argc, char** argv) {
 	PhiFinder phi_finder(tree);
 	VrtSaver vb_saver("b_vrt", tree);
 	VrtSaver vp_saver("b_pv_vrt", tree);
+#ifdef MC
+	BsJPsiPhiMCFinder mc_finder(tree, treeMC)
+#endif
 
 	/* -- Info missing by the savers -- */
 	double bs_mass, bs_mass_error, bs_lhtag, bs_pdl, bs_epdl;
@@ -239,6 +246,11 @@ int main(int argc, char** argv) {
 		AA::analyse();
 		AA::select(AA::TAG);
 
+#ifdef MC
+		if (!jpsi_finder.find())
+			continue;
+		treeMC->Fill();
+#endif
 		if (!jpsi_finder.find())
 			continue;
 		if (!phi_finder.find())
@@ -369,6 +381,9 @@ int main(int argc, char** argv) {
 				phi_finder.fill();      // K+, K-, Phi info.
 				vb_saver.fill(b_vrt);  // B vertex info.
 				vp_saver.fill(*b_pv);    // Primary vertex info.
+#ifdef MC
+				mc_finder.fill(muplus, muminus, kplus, kminus);
+#endif
 
 				PtlLst particle_list;
 				particle_list.push_back(muplus);
@@ -439,6 +454,7 @@ int main(int argc, char** argv) {
 	}//End while next event.
 
 	tree.Write();
+	treeMC.Write();
 	root_file.Write();
 	root_file.Close();
 	std::cout << argv[0] << " II: bs_finder ended succesfully." << std::endl;

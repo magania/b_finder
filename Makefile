@@ -28,7 +28,7 @@ LIBS = $(AALIBS) $(ROOTLIBS) -lm#-lg2c -lm
 FLAGS = $(ROOTCFLAGS) -m32 
 
 
-MYLIBS = obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/VrtSaver.o obj/TagSaver.o 
+MYLIBS = obj/DecayMC.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/VrtSaver.o obj/TagSaver.o 
 all: bs_finder
 
 obj/%.o : src/%.cpp include/%.h
