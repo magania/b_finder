@@ -29,7 +29,7 @@ FLAGS = $(ROOTCFLAGS) -m32
 
 
 MYLIBS = obj/DecayMC.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/VrtSaver.o obj/TagSaver.o 
-all: bs_finder
+all: bs_finder bs_mcfinder
 
 obj/%.o : src/%.cpp include/%.h
 	g++ $(INCLUDES) -g -o $@ -c $<
@@ -40,6 +40,11 @@ $(MYLIBS): obj/%.o : src/%.cpp include/%.h
 bs_finder : bs_finder.cpp $(MYLIBS) $(AATRACK)
 	g++ $(INCLUDES) -g -o obj/bs_finder.o -c $<
 	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bs_finder obj/bs_finder.o $(MYLIBS) $(AATRACK)
+
+bs_mcfinder : bs_finder.cpp $(MYLIBS) $(AATRACK)
+	g++ $(INCLUDES) -g -DMC -o obj/bs_mcfinder.o -c $<
+	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bs_mcfinder obj/bs_mcfinder.o $(MYLIBS) $(AATRACK)
+
 
 clean: 
 	rm $(MYLIBS) obj/b_tag.o b_tag

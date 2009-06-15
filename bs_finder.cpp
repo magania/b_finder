@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
 	VrtSaver vb_saver("b_vrt", tree);
 	VrtSaver vp_saver("b_pv_vrt", tree);
 #ifdef MC
-	BsJPsiPhiMCFinder mc_finder(tree, treeMC)
+	BsJPsiPhiMCFinder mc_finder(tree, treeMC);
 #endif
 
 	/* -- Info missing by the savers -- */
@@ -247,9 +247,9 @@ int main(int argc, char** argv) {
 		AA::select(AA::TAG);
 
 #ifdef MC
-		if (!jpsi_finder.find())
+		if (!mc_finder.find())
 			continue;
-		treeMC->Fill();
+		treeMC.Fill();
 #endif
 		if (!jpsi_finder.find())
 			continue;
@@ -454,7 +454,9 @@ int main(int argc, char** argv) {
 	}//End while next event.
 
 	tree.Write();
+#ifdef MC
 	treeMC.Write();
+#endif
 	root_file.Write();
 	root_file.Close();
 	std::cout << argv[0] << " II: bs_finder ended succesfully." << std::endl;

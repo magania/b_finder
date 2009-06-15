@@ -30,11 +30,14 @@ bool BsJPsiPhiMCFinder::find(){
 			-321, &kplus_gen,321, &kminus_gen);
 	mc_run = runNumber;
 	mc_evt = evtNumber;
-	mc_match = (int) DecayMC::match(muplus_gen, &muplus_reco,
-			muminus_gen, &muminus_reco,
-			kplus_gen, &kplus_reco,
-			kminus_gen, &kminus_reco, 99.0);
-	return mc_match && ((mc_nbs==1&&mc_nbsbar==0) || (mc_nbs==0&&mc_nbsbar==1));
+        mc_match = 0;
+        if ( (mc_nbs==1&&mc_nbsbar==0) || (mc_nbs==0&&mc_nbsbar==1) )
+	  mc_match = (int) DecayMC::match(muplus_gen, &muplus_reco,
+	         		muminus_gen, &muminus_reco,
+	         		kplus_gen, &kplus_reco,
+		        	kminus_gen, &kminus_reco, 99);
+        
+	return mc_match;
 }
 
 void BsJPsiPhiMCFinder::fill(Ptl* muplus, Ptl* muminus, Ptl* kplus, Ptl* kminus){
