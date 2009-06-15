@@ -48,94 +48,6 @@ double PDG_MU_MASS = 0.1056583668;
 double MASS_BS_MIN = 5.0;
 double MASS_BS_MAX = 5.8;
 
-/*
-Ptl.hpp
-bool pdl(PtlLst* plst, double& pdl, double& epdl);
-
-Ptl.cpp
-bool AA::Ptl::pdl(PtlLst* plst, double mass, double& pdl, double& e_pdl){
-  //Exclude all particles in the list plst from the primary vertex
-  //and compute the resulting decay length
-
-  if(_pvp == 0) return false;
-  if(_pve == 0) return false;
-
-  //Create list of chains to be excluded
-  list<const Chain*> lpch;
-  for(PtlLstIt p = plst->begin(); p != plst->end(); ++p){
-    lpch.push_back((*p)->chain());
-  }
-  HepVector x(3);
-  HepSymMatrix vx(3);
-  (const_cast<Vrt*>(_pvp))->exclude(lpch,x,vx);
-
-
-  HepVector P(2);
-  HepSymMatrix VP(2);
-  P(1) = _mom(1); P(2) = _mom(2);
-  VP(1,1) = _vmom(1,1);  VP(1,2) = _vmom(1,2);
-  VP(2,2) = _vmom(2,2);
-
-  HepVector PV(2);
-  HepSymMatrix VPV(2);
-  PV(1) = x(1); PV(2) = x(2);
-  VPV(1,1) = vx(1,1);  VPV(1,2) = vx(1,2);
-  VPV(2,2) = vx(2,2);
-
-  HepVector SV(2);
-  HepSymMatrix VSV(2);
-  if(!_cnsApplied) {
-     SV(1) = _pve->x(1);  SV(2) = _pve->x(2);
-     VSV(1,1) = _pve->v(1,1);  VSV(1,2) = _pve->v(1,2);
-     VSV(2,2) = _pve->v(2,2);
-  } else {
-     SV(1) = _cns(1);  SV(2) = _cns(2);
-     VSV(1,1) = _vCns(1,1);  VSV(1,2) = _vCns(1,2);
-     VSV(2,2) = _vCns(2,2);
-  }
-
-  HepVector L(2);
-  L = SV - PV;
-  double lxy = dot(L,P)/P.norm();
-  pdl = lxy*mass/P.norm();
-
- / * Aij = PiPj/p2
-   * Bij = LiLj/Lxy2 (Li = SVi - PVi)
-   * EPij = Vij(P)/p2
-   * ELij = Vij(L)/Lxy^2;
-   * Cij = LiPj/(pLxy)
-   * /
-
-  HepSymMatrix VL(2);
-  VL = VSV + VPV;
-
-  HepSymMatrix A(2), B(2), EP(2), EL(2);
-  HepMatrix C(2,2);
-  double p2 = P.norm()*P.norm();
-  A(1,1) = P(1)*P(1)/p2;  A(1,2) = P(1)*P(2)/p2;
-  A(2,2) = P(2)*P(2)/p2;
-
-  double lxy2 = lxy*lxy;
-  B(1,1) = L(1)*L(1)/lxy2;  B(1,2) = L(1)*L(2)/lxy2;
-  B(2,2) = L(2)*L(2)/lxy2;
-
-  double plxy = P.norm()*lxy;
-  C(1,1) = L(1)*P(1)/plxy;  C(1,2) = L(1)*P(2)/plxy;
-  C(2,1) = L(2)*P(1)/plxy;  C(2,2) = L(2)*P(2)/plxy;
-
-  EP = VP/p2;
-  EL = VL/lxy2;
-
-        //Computing Sigma Lxy
-        // Sigma Lxy^2 = Tr{A*EL + (B + 4*A - 4*C)*E}
-  HepMatrix SL(2,2);
-  SL = A*EL + (B + 4*A - 4*C)*EP;
-  e_pdl = fabs(pdl) * sqrt(SL(1,1)+SL(2,2));
-  return true;
-}
-
- */
-
 /* -- Legendary threeAngles function:
  * mu_p: positive muon
  * mu_n: negative muon
@@ -470,7 +382,9 @@ int main(int argc, char** argv) {
 				bs_mass_error = emb;
 
 				/* -- lifetime & lifetime_error -- */
-				b.pdl(&particle_list, PDG_BS_MASS, bs_pdl, bs_epdl);
+                                double ctau, vctau;
+				b.decayLengthProper(PDG_BS_MASS, ctau, vctau, &particle_list);
+				bs_pdl = ctau; bs_epdl=sqrt(fabs(vctau));
 
 				/* -- Calculate isolation of B -- */
 				const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
