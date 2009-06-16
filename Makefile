@@ -38,7 +38,7 @@ $(MYLIBS): obj/%.o : src/%.cpp include/%.h
 	g++ $(INCLUDES) -g -o $@ -c $<
 	
 bs_finder : bs_finder.cpp $(MYLIBS) $(AATRACK)
-	g++ $(INCLUDES) -g -o obj/bs_finder.o -c $<
+	g++ $(INCLUDES) -D$(DFLAGS) -g -o obj/bs_finder.o -c $<
 	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bs_finder_${DFLAGS} obj/bs_finder.o $(MYLIBS) $(AATRACK)
 
 #bs_mcfinder : bs_finder.cpp $(MYLIBS) $(AATRACK)
