@@ -116,7 +116,7 @@ void params() {
 	AA::xBeamDefault = -0.030;
 	AA::yBeamDefault = +0.030;
 
-	AA::nTrkMinVrt = 3;
+	AA::nTrkMinVrt = 5; //It defines the minimal number of tracks in the primary vertex.
 	AA::correctMomentum = false;
 
 	//parameters for jet finding (see PYTHIA description)
@@ -207,15 +207,33 @@ int main(int argc, char** argv) {
 
 	/* -- Info missing by the savers -- */
 	double bs_mass, bs_mass_error, bs_lhtag, bs_pdl, bs_epdl;
+	double mu_plus_cpx, mu_plus_cpy, mu_plus_cpz;
+	double mu_minus_cpx, mu_minus_cpy, mu_minus_cpz;
+	double k_plus_cpx, k_plus_cpy, k_plus_cpz;
+	double k_minus_cpx, k_minus_cpy, k_minus_cpz;
 	double bs_iso, bs_iso_drmax, bs_iso_75;
 	double bs_jpsikp_chi2, bs_jpsikm_chi2;
 	double bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi;
+	double phi_mass_corrected, phi_mass_corrected_error;
 
 	tree.Branch("bs_mass", &bs_mass, "bs_mass/D");
 	tree.Branch("bs_mass_error", &bs_mass_error, "bs_mass_error/D");
 	tree.Branch("bs_lhtag", &bs_lhtag, "bs_lhtag/D");
 	tree.Branch("bs_pdl", &bs_pdl, "bs_pdl/D");
 	tree.Branch("bs_epdl", &bs_epdl, "bs_epdl/D");
+
+	tree.Branch("mu_plus_cpx", &mu_plus_cpx, "mu_plus_cpx/D");
+	tree.Branch("mu_plus_cpy", &mu_plus_cpy, "mu_plus_cpy/D");
+	tree.Branch("mu_plus_cpz", &mu_plus_cpz, "mu_plus_cpz/D");
+	tree.Branch("mu_minus_cpx", &mu_minus_cpx, "mu_minus_cpx/D");
+	tree.Branch("mu_minus_cpy", &mu_minus_cpy, "mu_minus_cpy/D");
+	tree.Branch("mu_minus_cpz", &mu_minus_cpz, "mu_minus_cpz/D");
+	tree.Branch("k_plus_cpx", &k_plus_cpx, "k_plus_cpx/D");
+	tree.Branch("k_plus_cpy", &k_plus_cpy, "k_plus_cpy/D");
+	tree.Branch("k_plus_cpz", &k_plus_cpz, "k_plus_cpz/D");
+	tree.Branch("k_minus_cpx", &k_minus_cpx, "k_minus_cpx/D");
+	tree.Branch("k_minus_cpy", &k_minus_cpy, "k_minus_cpy/D");
+	tree.Branch("k_minus_cpz", &k_minus_cpz, "k_minus_cpz/D");
 
 	tree.Branch("bs_angle_phi", &bs_angle_phi, "bs_angle_phi/D");
 	tree.Branch("bs_angle_ctheta", &bs_angle_ctheta, "bs_angle_ctheta/D");
@@ -227,6 +245,9 @@ int main(int argc, char** argv) {
 
 	tree.Branch("bs_jpsikp_chi2", &bs_jpsikp_chi2, "bs_jpsikp_chi2/D");
 	tree.Branch("bs_jpsikm_chi2", &bs_jpsikm_chi2, "bs_jpsikm_chi2/D");
+
+	tree.Branch("phi_mass_corrected", &phi_mass_corrected, "phi_mass_corrected/D");
+	tree.Branch("phi_mass_corrected_error", &phi_mass_corrected_error, "phi_mass_corrected_error/D");
 
 	/* -- Initilization of geometry, field and beam spot.
 	 * Should be done after the fileLst or eventLst initilization -- */
@@ -319,6 +340,32 @@ int main(int argc, char** argv) {
 			    if (!b_vrt.associateToVrt(&AA::vrtPBox, b_pv))
 			      continue;
 
+			    /* --  likelihood ratio --
+				 * Chi2 Difference between B vertex and J/psi vertex
+				 */
+			    double sum_iso_lh = 0;
+				const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
+			    for( PtlLstCIt piso = ptl_lst->begin(); piso != ptl_lst->end(); ++piso){
+			    	Ptl *p = *piso;
+			        if(jpsi->primaryVertex() != p->primaryVertex()) continue;
+			        if(p == muplus || p == muminus || p==kplus || p==kminus) continue;
+			        if(p->dR(b.mom()) > 0.5) continue;
+			        sum_iso_lh += p->ptot();
+			    }
+		        double bs_iso_lh = b.ptot()/(b.ptot() + sum_iso_lh);
+
+				double chi2_b_minus_jpsi = b_vrt.chi2() - jpsi->decayVertex()->chi2();
+
+				/* Define likelihood ratio discriminating variables */
+				vector<double> lh_var;
+				vector<double> lh_rat;
+				lh_var.push_back(bs_iso_lh);
+				lh_var.push_back(chi2_b_minus_jpsi);
+				lh_var.push_back(b.pt());
+				lh_var.push_back(phi_finder.getMass());
+
+				AA::combinedTagJPsiPhi(lh_var, lh_rat, bs_lhtag);
+
 			    /* -- Guennadi Vertex Constraint gvc --*/
 			    /* Define constraints */
 			    CnsLst clst;
@@ -364,8 +411,8 @@ int main(int argc, char** argv) {
 			    vector<HepVector> moms;
 			    vector<HepSymMatrix> vmoms;
 			    if(!b.momChildren(moms,vmoms)) continue;
-                             
-                            bs_found = true;
+
+                bs_found = true;
 		            /* ---------------- /Selection ------------- */
 			    /* Selection generate this variables:
 			     * Vrt jpsi_kp_vrt        JPsi + K+ vertex
@@ -399,13 +446,18 @@ int main(int argc, char** argv) {
 				bs_mass = mb;
 				bs_mass_error = emb;
 
+				/* -- Corrected momentums -- */
+				mu_plus_cpx  = moms[0](1); mu_plus_cpy  = moms[0](2); mu_plus_cpz  = moms[0](3);
+				mu_minus_cpx = moms[1](1); mu_minus_cpy = moms[1](2); mu_minus_cpz = moms[1](3);
+				k_plus_cpx   = moms[2](1); k_plus_cpy   = moms[2](2); k_plus_cpz   = moms[2](3);
+				k_minus_cpx  = moms[3](1); k_minus_cpy  = moms[3](2); k_minus_cpz  = moms[3](3);
+
 				/* -- lifetime & lifetime_error -- */
-                                double ctau, vctau;
-				b.decayLengthProper(PDG_BS_MASS, ctau, vctau, &particle_list);
+                double ctau, vctau;
+				//b.decayLengthProper(PDG_BS_MASS, ctau, vctau, &particle_list);
 				bs_pdl = ctau; bs_epdl=sqrt(fabs(vctau));
 
 				/* -- Calculate isolation of B -- */
-				const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
 				double drmax = muminus->dR(b.mom());
 				if ( muplus->dR(b.mom()) > drmax ) drmax = muplus->dR(b.mom());
 				if ( kplus->dR(b.mom())  > drmax )  drmax = kplus->dR(b.mom());
@@ -424,21 +476,6 @@ int main(int argc, char** argv) {
 				bs_iso_drmax = b.ptot() / (b.ptot() + sum_drmax);
 				bs_iso_75    = b.ptot() / (b.ptot() + sum_75);
 
-				/* --  likelihood ratio --
-				* Chi2 Difference between B vertex and J/psi vertex
-				*/
-				double chi2_b_minus_jpsi = b_vrt.chi2() - jpsi->decayVertex()->chi2();
-
-				/* Define likelihood ratio discriminating variables */
-				vector<double> lh_var;
-				vector<double> lh_rat;
-				lh_var.push_back(bs_iso);
-				lh_var.push_back(chi2_b_minus_jpsi);
-				lh_var.push_back(b.pt());
-				lh_var.push_back(phi_finder.getMass());
-
-				AA::combinedTagJPsiPhi(lh_var, lh_rat, bs_lhtag);
-
 				/* -- Intermediate vertex chi2 -- */
 				bs_jpsikp_chi2 = jpsi_kp_vrt.chi2();
 				bs_jpsikm_chi2 = jpsi_km_vrt.chi2();
@@ -451,6 +488,18 @@ int main(int argc, char** argv) {
 				l_kminus.SetXYZM (moms[3](1), moms[3](2), moms[3](3), PDG_KAON_MASS);
 
 				threeAngles(l_muplus, l_muminus, l_kplus, l_kminus, bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi);
+				/* -- Phi corrected mass -- */
+				vector<PType> phi_types(2);
+				double mkkC,vmkkC;
+				PtlLst phi_list;
+				phi_list.push_back(kplus);
+				phi_list.push_back(kminus);
+				phi_types[0] = AA::K_PLUS;
+				phi_types[1] = AA::K_MINUS;
+				b.mass(phi_types,mkkC,vmkkC,&phi_list);
+				phi_mass_corrected = mkkC;
+				phi_mass_corrected_error = sqrt(fabs(vmkkC));
+
 				/* --------------------- /savers ------------------------*/
 				tree.Fill();   // FILL
 			}
