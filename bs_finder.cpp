@@ -256,6 +256,7 @@ int main(int argc, char** argv) {
 		if (!phi_finder.find())
 			continue;
 
+		bool bs_found = false;
 		jpsi_finder.begin();
 		phi_finder.begin();
 		while (jpsi_finder.next())
@@ -363,7 +364,9 @@ int main(int argc, char** argv) {
 			    vector<HepVector> moms;
 			    vector<HepSymMatrix> vmoms;
 			    if(!b.momChildren(moms,vmoms)) continue;
-				/* ---------------- /Selection ------------- */
+                             
+                            bs_found = true;
+		            /* ---------------- /Selection ------------- */
 			    /* Selection generate this variables:
 			     * Vrt jpsi_kp_vrt        JPsi + K+ vertex
 			     * Vrt jpsi_km_vrt        JPsi + K- vertex
@@ -451,6 +454,8 @@ int main(int argc, char** argv) {
 				/* --------------------- /savers ------------------------*/
 				tree.Fill();   // FILL
 			}
+              if ( bs_found )
+                 dst.outEventLst("bs_elist");
 	}//End while next event.
 
 	tree.Write();

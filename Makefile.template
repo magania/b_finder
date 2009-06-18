@@ -1,10 +1,10 @@
 #----------------- aatrack ---------------
-AAMC=/home/magania/Bs/aatrack/mc/AA
-AA17=/home/magania/local/aatrack/aa_p17/AA
-AA20=/home/magania/local/aatrack/aa_p20/AA
-AA21=/home/magania/local/aatrack/aa_p21/AA
-AA=$(AAMC)
-DFLAGS=MC
+#AAMC=/home/magania/Bs/aatrack/P17/AA
+#AA17=/home/magania/Bs/aatrack/P17/AA
+#AA20=/home/magania/Bs/aatrack/P20/AA
+#AA21=/home/magania/Bs/aatrack/P21/AA
+#AA=$(AA21)
+#DFLAGS=P21
 
 #INCLUDES = -I$(CERNSOURCE_DIR)/cosrc/include -I $(AA)/CLHEP -I $(AA)/src -I $(AA)
 AAINCLUDE = -I $(AA)/CLHEP -I $(AA)/src -I $(AA)
