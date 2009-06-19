@@ -5,7 +5,9 @@
  *      Author: magania
  */
 
+#if MC
 #include <BsJPsiPhiMCFinder.h>
+#endif
 #include <EvtSaver.h>
 #include <PtlSaver.h>
 #include <VrtSaver.h>
@@ -29,7 +31,7 @@
 #include <select.hpp>
 #include <Monitor.hpp>
 #include <V0Finder.hpp>
-#if defined(P17) || defined(P20)
+#if defined(P17) || defined(P20) || defined(MC)
 #include "IPcal.hpp"
 #endif
 
@@ -139,6 +141,7 @@ void params() {
 	findSVFlag = true;
 
 	selectEleFlag = true;
+        //AA::selectJPsiPhiFlag   = true;
 }
 
 void start_ana(int argc, char** argv) {
@@ -212,6 +215,7 @@ int main(int argc, char** argv) {
 	double k_plus_cpx, k_plus_cpy, k_plus_cpz;
 	double k_minus_cpx, k_minus_cpy, k_minus_cpz;
 	double bs_iso, bs_iso_drmax, bs_iso_75;
+        double bs_iso_pv, bs_iso_drmax_pv, bs_iso_75_pv;
 	double bs_jpsikp_chi2, bs_jpsikm_chi2;
 	double bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi;
 	double phi_mass_corrected, phi_mass_corrected_error;
@@ -242,6 +246,10 @@ int main(int argc, char** argv) {
 	tree.Branch("bs_iso", &bs_iso, "bs_iso/D");
 	tree.Branch("bs_iso_drmax", &bs_iso_drmax, "bs_iso_drmax/D");
 	tree.Branch("bs_iso_75", &bs_iso_75, "bs_iso_75/D");
+        tree.Branch("bs_iso_pv", &bs_iso_pv, "bs_iso_pv/D");
+        tree.Branch("bs_iso_drmax_pv", &bs_iso_drmax_pv, "bs_iso_drmax_pv/D");
+        tree.Branch("bs_iso_75_pv", &bs_iso_75_pv, "bs_iso_75_pv/D");
+
 
 	tree.Branch("bs_jpsikp_chi2", &bs_jpsikp_chi2, "bs_jpsikp_chi2/D");
 	tree.Branch("bs_jpsikm_chi2", &bs_jpsikm_chi2, "bs_jpsikm_chi2/D");
@@ -254,7 +262,7 @@ int main(int argc, char** argv) {
 	AA::det.input();
 	AA::field.input();
 	AA::spot.input();
-#ifdef P17
+#if defined(P17) || defined(MC)
 	AA:ipcalib.input();
 #endif
 	AA::newEvent();
@@ -454,15 +462,16 @@ int main(int argc, char** argv) {
 
 				/* -- lifetime & lifetime_error -- */
                 double ctau, vctau;
-				//b.decayLengthProper(PDG_BS_MASS, ctau, vctau, &particle_list);
+				b.decayLengthProper(PDG_BS_MASS, ctau, vctau, &particle_list);
 				bs_pdl = ctau; bs_epdl=sqrt(fabs(vctau));
 
 				/* -- Calculate isolation of B -- */
 				double drmax = muminus->dR(b.mom());
 				if ( muplus->dR(b.mom()) > drmax ) drmax = muplus->dR(b.mom());
-				if ( kplus->dR(b.mom())  > drmax )  drmax = kplus->dR(b.mom());
+				if ( kplus->dR(b.mom())  > drmax ) drmax = kplus->dR(b.mom());
 				if ( kminus->dR(b.mom()) > drmax ) drmax = kminus->dR(b.mom());
 				double sum = 0; double sum_drmax = 0; double sum_75 = 0;
+                                double sum_pv = 0; double sum_drmax_pv = 0; double sum_75_pv = 0;
 				for (PtlLstCIt piso = ptl_lst->begin(); piso != ptl_lst->end(); ++piso) {
 					Ptl* ptlIso = *piso;
 					if (ptlIso == muplus || ptlIso == muminus || ptlIso == kplus || ptlIso == kminus)
@@ -471,10 +480,17 @@ int main(int argc, char** argv) {
 					if (driso <= 0.5)   sum += ptlIso->ptot();
 					if (driso <= drmax) sum_drmax += ptlIso->ptot();
 					if (driso <= 0.75)  sum_75 += ptlIso->ptot();
+                                        if(jpsi->primaryVertex() != ptlIso->primaryVertex()) continue;
+                                        if (driso <= 0.5)   sum_pv += ptlIso->ptot();
+                                        if (driso <= drmax) sum_drmax_pv += ptlIso->ptot();
+                                        if (driso <= 0.75)  sum_75_pv += ptlIso->ptot();
 				}
 				bs_iso       = b.ptot() / (b.ptot() + sum);
 				bs_iso_drmax = b.ptot() / (b.ptot() + sum_drmax);
 				bs_iso_75    = b.ptot() / (b.ptot() + sum_75);
+                                bs_iso_pv       = b.ptot() / (b.ptot() + sum_pv);
+                                bs_iso_drmax_pv = b.ptot() / (b.ptot() + sum_drmax_pv);
+                                bs_iso_75_pv    = b.ptot() / (b.ptot() + sum_75_pv);
 
 				/* -- Intermediate vertex chi2 -- */
 				bs_jpsikp_chi2 = jpsi_kp_vrt.chi2();
