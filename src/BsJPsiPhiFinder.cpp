@@ -72,6 +72,7 @@ void BsJPsiPhiFinder::clean(){
         v_jpsi_index.clear();
 	v_phi_index.clear();
         v_bs.clear();
+        v_bs_ucpt.clear();
         v_jpsi.clear();
 	v_muplus.clear();
 	v_muminus.clear();
