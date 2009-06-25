@@ -94,7 +94,7 @@ void JPsiFinder::setIndex(int i){
 		std::cout << "JPsiFinder: Error seting index " << i << " max: " << jpsi.size() << std::endl;
 		exit(EXIT_FAILURE);
 	} else {
-		index = 1;
+		index = i;
 	}
 }
 

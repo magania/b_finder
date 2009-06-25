@@ -98,6 +98,7 @@ private:
 	VrtSaver vb_saver;
 	VrtSaver vp_saver;
 
+        vector<double> v_bs_ucpt;
 	vector<int> v_jpsi_index, v_phi_index;
 	vector<Ptl*> v_bs, v_jpsi, v_muplus, v_muminus, v_kplus, v_kminus;
 	vector<Vrt*> v_bs_vrt, v_jpsi_kp_vrt, v_jpsi_km_vrt, v_bs_pv;
@@ -114,10 +115,11 @@ private:
 	double k_plus_cpx, k_plus_cpy, k_plus_cpz;
 	double k_minus_cpx, k_minus_cpy, k_minus_cpz;
 	double bs_iso, bs_iso_drmax, bs_iso_75;
-    double bs_iso_pv, bs_iso_drmax_pv, bs_iso_75_pv;
+	double bs_iso_pv, bs_iso_drmax_pv, bs_iso_75_pv;
 	double bs_jpsikp_chi2, bs_jpsikm_chi2;
 	double bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi;
 	double phi_mass_corrected, phi_mass_corrected_error;
+	double bs_ucpt, mu_plus_cpt, mu_minus_cpt, k_plus_cpt, k_minus_cpt, jpsi_cpt, phi_cpt;
 
 //    double tree_jpsi_mass;
 

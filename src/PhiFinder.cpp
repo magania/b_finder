@@ -110,7 +110,7 @@ void PhiFinder::setIndex(int i){
 		std::cout << "phiFinder: Error seting index " << i << " max: " << phi.size() << std::endl;
 		exit(EXIT_FAILURE);
 	} else {
-		index = 1;
+		index = i;
 	}
 }
 

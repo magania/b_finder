@@ -131,6 +131,7 @@ int main(int argc, char** argv) {
 		AA::spot.set();
 		AA::analyse();
 		AA::select(AA::TAG);
+                //std::cout << "Run:" << AA::runNumber << " Evt: "  << AA::evtNumber << std::endl;
 #ifdef MC
 		if (!mc_finder.find())
 			continue;
@@ -138,8 +139,10 @@ int main(int argc, char** argv) {
 #endif
 		if (!jpsi_finder.find())
 			continue;
+		//std::cout << "JPsi" << std::endl;
 		if (!phi_finder.find())
 			continue;
+                //std::cout << "Phi" << std::endl;
 
 		if (!bs_finder.find())
 			continue;

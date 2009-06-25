@@ -54,6 +54,14 @@ BsJPsiPhiFinder::BsJPsiPhiFinder(JPsiFinder *jpsi, PhiFinder *phi, TTree &tree, 
 
 	tree.Branch("phi_mass_corrected", &phi_mass_corrected, "phi_mass_corrected/D");
 	tree.Branch("phi_mass_corrected_error", &phi_mass_corrected_error, "phi_mass_corrected_error/D");
+
+        tree.Branch("bs_ucpt",      &bs_ucpt,      "bs_ucpt/D");
+        tree.Branch("mu_plus_cpt",  &mu_plus_cpt,  "mu_plus_cpt/D");
+        tree.Branch("mu_minus_cpt", &mu_minus_cpt, "mu_minus_cpt/D");
+        tree.Branch("k_plus_cpt",   &k_plus_cpt,   "k_plus_cpt/D");
+        tree.Branch("k_minus_cpt",  &k_minus_cpt,  "k_minus_cpt/D");
+        tree.Branch("jpsi_cpt",     &jpsi_cpt,     "jpsi_cpt/D");
+        tree.Branch("phi_cpt",      &phi_cpt,      "phi_cpt/D");
 }
 
 BsJPsiPhiFinder::~BsJPsiPhiFinder() {
@@ -61,10 +69,37 @@ BsJPsiPhiFinder::~BsJPsiPhiFinder() {
 }
 
 void BsJPsiPhiFinder::clean(){
-
+        v_jpsi_index.clear();
+	v_phi_index.clear();
+        v_bs.clear();
+        v_jpsi.clear();
+	v_muplus.clear();
+	v_muminus.clear();
+	v_kplus.clear();
+	v_kminus.clear();
+        v_bs_vrt.clear();
+	v_jpsi_kp_vrt.clear();
+	v_jpsi_km_vrt.clear();
+	v_bs_pv.clear();
+        v_lhtag.clear();
+	v_mb.clear();
+	v_emb.clear();
+        v_muplus_cpx.clear();
+	v_muplus_cpy.clear();
+	v_muplus_cpz.clear();
+        v_muminus_cpx.clear();
+	v_muminus_cpy.clear();
+	v_muminus_cpz.clear();
+        v_kplus_cpx.clear();
+	v_kplus_cpy.clear();
+	v_kplus_cpz.clear();
+        v_kminus_cpx.clear();
+	v_kminus_cpy.clear();
+	v_kminus_cpz.clear();
 }
 
 int BsJPsiPhiFinder::find(){
+        //std::cout << "Finding Bs .. " << std::endl;
 	clean();
 	jpsi_finder->begin();
 	phi_finder->begin();
@@ -121,6 +156,9 @@ int BsJPsiPhiFinder::find(){
 		      continue;
 		    if (!bs->associateToVrt(&AA::vrtPBox))
 		      continue;
+                      
+                    /* -- Save the original bs pt -- */
+                    double tmp_ucpt = bs->pt();
 
 		    /*-- Find primary vertex with minimal distance to B vertex --*/
 		    Vrt* bs_pv = 0;
@@ -210,6 +248,9 @@ int BsJPsiPhiFinder::find(){
              * vector<double> v_kminus_cpx, v_kminus_cpy, v_kminus_cpz;
 		     */
 
+                    //std::cout << "Bs: " << v_bs.size() 
+                    //          << " JPsi: " << jpsi_finder->getIndex() 
+                    //          << " Phi:" << phi_finder->getIndex() << std::endl;
 		    v_jpsi_index.push_back(jpsi_finder->getIndex());
 		    v_phi_index.push_back(phi_finder->getIndex());
 
@@ -219,19 +260,21 @@ int BsJPsiPhiFinder::find(){
 		    v_muminus.push_back(muminus);
 		    v_kplus.push_back(kplus);
 		    v_kminus.push_back(kminus);
-		    v_bs_vrt.push_back(v_bs_vrt[index]);
+		    v_bs_vrt.push_back(bs_vrt);
 		    v_jpsi_kp_vrt.push_back(jpsi_kp_vrt);
 		    v_jpsi_km_vrt.push_back(jpsi_km_vrt);
 		    v_bs_pv.push_back(bs_pv);
 		    v_lhtag.push_back(lhtag);
 		    v_mb.push_back(mb);
 		    v_emb.push_back(emb);
+                    v_bs_ucpt.push_back(tmp_ucpt);
 
 		    v_muplus_cpx.push_back(moms[0](1)); v_muplus_cpy.push_back(moms[0](2)); v_muplus_cpz.push_back(moms[0](3));
 		    v_muminus_cpx.push_back(moms[1](1));v_muminus_cpy.push_back(moms[1](2));v_muminus_cpz.push_back(moms[1](3));
 		    v_kplus_cpx.push_back(moms[2](1));  v_kplus_cpy.push_back(moms[2](2));  v_kplus_cpz.push_back(moms[2](3));
 		    v_kminus_cpx.push_back(moms[3](1)); v_kminus_cpy.push_back(moms[3](2)); v_kminus_cpz.push_back(moms[3](3));
 		}
+  //std::cout << "Found: " << v_bs.size() << std::endl;
   return v_bs.size();
 }
 
@@ -249,6 +292,7 @@ bool BsJPsiPhiFinder::next(){
 
 
 void BsJPsiPhiFinder::fill(){
+        //std::cout << "Filling: " << index << " JPsi:" << v_jpsi_index[index] << " Phi:" << v_phi_index[index] << std::endl;
 	jpsi_finder->setIndex(v_jpsi_index[index]);
 	phi_finder->setIndex(v_phi_index[index]);
 
@@ -281,6 +325,9 @@ if (mc_finder)
     double ctau, vctau;
 	v_bs[index]->decayLengthProper(PDG_BS_MASS, ctau, vctau, &particle_list);
 	bs_pdl = ctau; bs_epdl=sqrt(fabs(vctau));
+
+        /* -- guennadi likelihood ratio -- */
+        bs_lhtag = v_lhtag[index];
 
 	/* -- Calculate isolation of B -- */
 	const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
@@ -334,6 +381,16 @@ if (mc_finder)
 	phi_mass_corrected = mkkC;
 	phi_mass_corrected_error = sqrt(fabs(vmkkC));
 
+	/* -- corrected pt and bs uncorrected pt -- */
+        bs_ucpt = v_bs_ucpt[index];
+        mu_plus_cpt = sqrt(v_muplus_cpx[index]*v_muplus_cpx[index] + v_muplus_cpy[index]*v_muplus_cpy[index]);
+        mu_minus_cpt = sqrt(v_muminus_cpx[index]*v_muminus_cpx[index] + v_muminus_cpy[index]*v_muminus_cpy[index]);
+        k_plus_cpt = sqrt(v_kplus_cpx[index]*v_kplus_cpx[index] + v_kplus_cpy[index]*v_kplus_cpy[index]);
+        k_minus_cpt = sqrt(v_kminus_cpx[index]*v_kminus_cpx[index] + v_kminus_cpy[index]*v_kminus_cpy[index]);
+        jpsi_cpt = sqrt( (v_muplus_cpx[index]+v_muminus_cpx[index])*(v_muplus_cpx[index]+v_muminus_cpx[index])
+                         + (v_muplus_cpy[index]+v_muminus_cpy[index])*(v_muplus_cpy[index]+v_muminus_cpy[index]) );
+        phi_cpt  = sqrt( (v_kplus_cpx[index]+v_kminus_cpx[index])*(v_kplus_cpx[index]+v_kminus_cpx[index])  
+                         + (v_kplus_cpy[index]+v_kminus_cpy[index])*(v_kplus_cpy[index]+v_kminus_cpy[index]) );
 }
 
 /* -- Legendary threeAngles function:
