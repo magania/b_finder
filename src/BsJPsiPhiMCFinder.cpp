@@ -36,12 +36,13 @@ bool BsJPsiPhiMCFinder::find(){
 	         		muminus_gen, &muminus_reco,
 	         		kplus_gen, &kplus_reco,
 		        	kminus_gen, &kminus_reco, 99);
-        
+
 	return mc_match;
 }
 
 void BsJPsiPhiMCFinder::fill(Ptl* muplus, Ptl* muminus, Ptl* kplus, Ptl* kminus){
 	PtlMC*  muplus_inv, *muminus_inv, *kplus_inv, *kminus_inv;
+	muplus_inv = 0; muminus_inv = 0; kplus_inv = 0; kminus_inv = 0;
 	muplus_inv  = DecayMC::imatch(muplus);
 	muminus_inv = DecayMC::imatch(muminus);
     kplus_inv   = DecayMC::imatch(kplus);

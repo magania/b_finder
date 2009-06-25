@@ -28,6 +28,8 @@ public:
 	int find();
 	void begin();
 	bool next();
+	int getIndex();
+	void setIndex(int i);
 
 	AA::Ptl& getMuPlus();
 	AA::Ptl& getMuMinus();

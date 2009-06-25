@@ -85,6 +85,19 @@ bool JPsiFinder::next(){
 	return false;
 }
 
+int JPsiFinder::getIndex(){
+	return index;
+}
+
+void JPsiFinder::setIndex(int i){
+	if ( i > jpsi.size()  || i < 0){
+		std::cout << "JPsiFinder: Error seting index " << i << " max: " << jpsi.size() << std::endl;
+		exit(EXIT_FAILURE);
+	} else {
+		index = 1;
+	}
+}
+
 AA::Ptl& JPsiFinder::getMuPlus(){
 	return *mu_plus[index];
 }

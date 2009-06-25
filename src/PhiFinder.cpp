@@ -101,6 +101,19 @@ bool PhiFinder::next(){
 	return false;
 }
 
+int PhiFinder::getIndex(){
+	return index;
+}
+
+void PhiFinder::setIndex(int i){
+	if ( i > phi.size()  || i < 0){
+		std::cout << "phiFinder: Error seting index " << i << " max: " << phi.size() << std::endl;
+		exit(EXIT_FAILURE);
+	} else {
+		index = 1;
+	}
+}
+
 AA::Ptl& PhiFinder::getKPlus(){
 	return *k_plus[index];
 }
