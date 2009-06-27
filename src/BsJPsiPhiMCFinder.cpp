@@ -57,5 +57,5 @@ void BsJPsiPhiMCFinder::fill(Ptl* muplus, Ptl* muminus, Ptl* kplus, Ptl* kminus)
     mc_match = (int)(muplus == muplus_reco && muminus == muminus_reco
                          && kplus == kplus_reco && kminus == kminus_reco);
     mc_match_sw = (int)(muplus == muplus_reco && muminus == muminus_reco
-                         && kplus == kminus_reco && kminus == kplos_reco);
+                         && kplus == kminus_reco && kminus == kplus_reco);
 }

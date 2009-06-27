@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
 		AA::select(AA::TAG);
                 //std::cout << "Run:" << AA::runNumber << " Evt: "  << AA::evtNumber << std::endl;
 #ifdef MC
-                mc_finder.find()
+                mc_finder.find();
 		treeMC.Fill();
 #endif
 		if (!jpsi_finder.find())
