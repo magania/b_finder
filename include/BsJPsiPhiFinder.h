@@ -98,7 +98,7 @@ private:
 	VrtSaver vb_saver;
 	VrtSaver vp_saver;
 
-        vector<double> v_bs_ucpt;
+      //  vector<double> v_bs_ucpt;
         vector<HepVector> v_bs_mom;
 	vector<int> v_jpsi_index, v_phi_index;
 	vector<Ptl*> v_bs, v_jpsi, v_muplus, v_muminus, v_kplus, v_kminus;
@@ -110,7 +110,7 @@ private:
 	vector<double> v_kminus_cpx, v_kminus_cpy, v_kminus_cpz;
 
 	/* -- Info missing by the savers -- */
-	double bs_mass, bs_mass_error, bs_lhtag, bs_pdl, bs_epdl;
+	double bs_mass, bs_mass_error, bs_lhtag, bs_pdl, bs_epdl, bs_ucpt, bs_ucptot;
         double mu_plus_dR, mu_minus_dR, k_plus_dR, k_minus_dR;
 	double mu_plus_cpx, mu_plus_cpy, mu_plus_cpz;
 	double mu_minus_cpx, mu_minus_cpy, mu_minus_cpz;
@@ -121,12 +121,12 @@ private:
 	double bs_jpsikp_chi2, bs_jpsikm_chi2;
 	double bs_angle_phi, bs_angle_ctheta, bs_angle_cpsi;
 	double phi_mass_corrected, phi_mass_corrected_error;
-	double bs_ucpt, mu_plus_cpt, mu_minus_cpt, k_plus_cpt, k_minus_cpt, jpsi_cpt, phi_cpt;
+	double mu_plus_cpt, mu_minus_cpt, k_plus_cpt, k_minus_cpt, jpsi_cpt, phi_cpt;
 
 //    double tree_jpsi_mass;
 
-    double mu_leading_pt, mu_trailing_pt;
-    double mu_leading_ptot, mu_trailing_ptot;
+//    double mu_leading_pt, mu_trailing_pt;
+//    double mu_leading_ptot, mu_trailing_ptot;
 };
 
 #endif /* BSJPSIPHIFINDER_H_ */

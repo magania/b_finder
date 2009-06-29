@@ -61,6 +61,7 @@ BsJPsiPhiFinder::BsJPsiPhiFinder(JPsiFinder *jpsi, PhiFinder *phi, TTree &tree, 
 	tree.Branch("phi_mass_corrected_error", &phi_mass_corrected_error, "phi_mass_corrected_error/D");
 
         tree.Branch("bs_ucpt",      &bs_ucpt,      "bs_ucpt/D");
+         tree.Branch("bs_ucptot",      &bs_ucptot,      "bs_ucptot/D");
         tree.Branch("mu_plus_cpt",  &mu_plus_cpt,  "mu_plus_cpt/D");
         tree.Branch("mu_minus_cpt", &mu_minus_cpt, "mu_minus_cpt/D");
         tree.Branch("k_plus_cpt",   &k_plus_cpt,   "k_plus_cpt/D");
@@ -74,7 +75,7 @@ BsJPsiPhiFinder::~BsJPsiPhiFinder() {
 }
 
 void BsJPsiPhiFinder::clean(){
-  for (int i = 0; i<v_bs.size(); i++)
+/*  for (int i = 0; i<v_bs.size(); i++)
     delete v_bs[index];
 
   for (int i = 0; i<v_bs_vrt.size(); i++)
@@ -84,12 +85,12 @@ void BsJPsiPhiFinder::clean(){
     delete v_jpsi_kp_vrt[index];
 
   for (int i = 0; i<v_jpsi_km_vrt.size(); i++)
-    delete v_jpsi_km_vrt[index];
+    delete v_jpsi_km_vrt[index];*/
 
         v_jpsi_index.clear();
 	v_phi_index.clear();
         v_bs.clear();
-        v_bs_ucpt.clear();
+//        v_bs_ucpt.clear();
         v_jpsi.clear();
 	v_muplus.clear();
 	v_muminus.clear();
@@ -177,7 +178,7 @@ int BsJPsiPhiFinder::find(){
 		      continue;
                       
                     /* -- Save the original bs pt -- */
-                    double tmp_ucpt = bs->pt();
+//                    double tmp_ucpt = bs->pt();
 		    HepVector tmp_bsmom = bs->mom();
 
 		    /*-- Find primary vertex with minimal distance to B vertex --*/
@@ -287,7 +288,7 @@ int BsJPsiPhiFinder::find(){
 		    v_lhtag.push_back(lhtag);
 		    v_mb.push_back(mb);
 		    v_emb.push_back(emb);
-                    v_bs_ucpt.push_back(tmp_ucpt);
+        //            v_bs_ucpt.push_back(tmp_ucpt);
                     v_bs_mom.push_back(tmp_bsmom);
 
 		    v_muplus_cpx.push_back(moms[0](1)); v_muplus_cpy.push_back(moms[0](2)); v_muplus_cpz.push_back(moms[0](3));
@@ -356,6 +357,11 @@ if (mc_finder)
         /* -- guennadi likelihood ratio -- */
         bs_lhtag = v_lhtag[index];
 
+        /* -- uncorrected momentum -- */
+        bs_ucpt = sqrt( v_bs_mom[index](1)*v_bs_mom[index](1) + v_bs_mom[index](2)*v_bs_mom[index](2) );
+        bs_ucptot =  sqrt( v_bs_mom[index](1)*v_bs_mom[index](1) + v_bs_mom[index](2)*v_bs_mom[index](2)
+                         + v_bs_mom[index](3)*v_bs_mom[index](3));
+
 	/* -- Calculate isolation of B -- */
 	const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
 	double drmax = v_muminus[index]->dR(v_bs_mom[index]);
@@ -377,12 +383,12 @@ if (mc_finder)
         if (driso <= drmax) sum_drmax_pv += ptlIso->ptot();
         if (driso <= 0.75)  sum_75_pv += ptlIso->ptot();
 	}
-	bs_iso       = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum);
-	bs_iso_drmax = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_drmax);
-	bs_iso_75    = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_75);
-    bs_iso_pv       = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_pv);
-    bs_iso_drmax_pv = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_drmax_pv);
-    bs_iso_75_pv    = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_75_pv);
+	bs_iso       = bs_ucptot / (bs_ucptot + sum);
+	bs_iso_drmax = bs_ucptot / (bs_ucptot + sum_drmax);
+	bs_iso_75    = bs_ucptot / (bs_ucptot + sum_75);
+    bs_iso_pv       = bs_ucptot / (bs_ucptot + sum_pv);
+    bs_iso_drmax_pv = bs_ucptot / (bs_ucptot + sum_drmax_pv);
+    bs_iso_75_pv    = bs_ucptot / (bs_ucptot + sum_75_pv);
 
 	/* -- Intermediate vertex chi2 -- */
 	bs_jpsikp_chi2 = v_jpsi_kp_vrt[index]->chi2();
@@ -409,7 +415,6 @@ if (mc_finder)
 	phi_mass_corrected_error = sqrt(fabs(vmkkC));
 
 	/* -- corrected pt and bs uncorrected pt -- */
-        bs_ucpt = v_bs_ucpt[index];
         mu_plus_cpt = sqrt(v_muplus_cpx[index]*v_muplus_cpx[index] + v_muplus_cpy[index]*v_muplus_cpy[index]);
         mu_minus_cpt = sqrt(v_muminus_cpx[index]*v_muminus_cpx[index] + v_muminus_cpy[index]*v_muminus_cpy[index]);
         k_plus_cpt = sqrt(v_kplus_cpx[index]*v_kplus_cpx[index] + v_kplus_cpy[index]*v_kplus_cpy[index]);
