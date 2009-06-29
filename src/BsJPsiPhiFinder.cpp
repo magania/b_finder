@@ -25,6 +25,11 @@ BsJPsiPhiFinder::BsJPsiPhiFinder(JPsiFinder *jpsi, PhiFinder *phi, TTree &tree, 
 	tree.Branch("bs_pdl", &bs_pdl, "bs_pdl/D");
 	tree.Branch("bs_epdl", &bs_epdl, "bs_epdl/D");
 
+	tree.Branch("mu_plus_dR", &mu_plus_dR, "mu_plus_dR/D");
+        tree.Branch("mu_minus_dR", &mu_minus_dR, "mu_minus_dR/D");
+        tree.Branch("k_plus_dR", &k_plus_dR, "k_plus_dR/D");
+        tree.Branch("k_minus_dR", &k_minus_dR, "k_minus_dR/D");
+
 	tree.Branch("mu_plus_cpx", &mu_plus_cpx, "mu_plus_cpx/D");
 	tree.Branch("mu_plus_cpy", &mu_plus_cpy, "mu_plus_cpy/D");
 	tree.Branch("mu_plus_cpz", &mu_plus_cpz, "mu_plus_cpz/D");
@@ -69,6 +74,18 @@ BsJPsiPhiFinder::~BsJPsiPhiFinder() {
 }
 
 void BsJPsiPhiFinder::clean(){
+  for (int i = 0; i<v_bs.size(); i++)
+    delete v_bs[index];
+
+  for (int i = 0; i<v_bs_vrt.size(); i++)
+    delete v_bs_vrt[index];
+
+  for (int i = 0; i<v_jpsi_kp_vrt.size(); i++)
+    delete v_jpsi_kp_vrt[index];
+
+  for (int i = 0; i<v_jpsi_km_vrt.size(); i++)
+    delete v_jpsi_km_vrt[index];
+
         v_jpsi_index.clear();
 	v_phi_index.clear();
         v_bs.clear();
@@ -97,6 +114,7 @@ void BsJPsiPhiFinder::clean(){
         v_kminus_cpx.clear();
 	v_kminus_cpy.clear();
 	v_kminus_cpz.clear();
+        v_bs_mom.clear();
 }
 
 int BsJPsiPhiFinder::find(){
@@ -160,6 +178,7 @@ int BsJPsiPhiFinder::find(){
                       
                     /* -- Save the original bs pt -- */
                     double tmp_ucpt = bs->pt();
+		    HepVector tmp_bsmom = bs->mom();
 
 		    /*-- Find primary vertex with minimal distance to B vertex --*/
 		    Vrt* bs_pv = 0;
@@ -269,6 +288,7 @@ int BsJPsiPhiFinder::find(){
 		    v_mb.push_back(mb);
 		    v_emb.push_back(emb);
                     v_bs_ucpt.push_back(tmp_ucpt);
+                    v_bs_mom.push_back(tmp_bsmom);
 
 		    v_muplus_cpx.push_back(moms[0](1)); v_muplus_cpy.push_back(moms[0](2)); v_muplus_cpz.push_back(moms[0](3));
 		    v_muminus_cpx.push_back(moms[1](1));v_muminus_cpy.push_back(moms[1](2));v_muminus_cpz.push_back(moms[1](3));
@@ -316,6 +336,12 @@ if (mc_finder)
 	bs_mass = v_mb[index];
 	bs_mass_error = v_emb[index];
 
+        /* -- dR -- */
+        mu_plus_dR = v_muplus[index]->dR(v_bs_mom[index]);
+        mu_minus_dR =  v_muminus[index]->dR(v_bs_mom[index]);
+        k_plus_dR = v_kplus[index]->dR(v_bs_mom[index]);
+        k_minus_dR =  v_kminus[index]->dR(v_bs_mom[index]);
+
 	/* -- Corrected momentums -- */
 	mu_plus_cpx  = v_muplus_cpx[index];  mu_plus_cpy  = v_muplus_cpy[index];  mu_plus_cpz  = v_muplus_cpz[index];
 	mu_minus_cpx = v_muminus_cpx[index]; mu_minus_cpy = v_muminus_cpy[index]; mu_minus_cpz = v_muminus_cpz[index];
@@ -332,17 +358,17 @@ if (mc_finder)
 
 	/* -- Calculate isolation of B -- */
 	const AA::PtlLst* ptl_lst = AA::ptlBox.particles();
-	double drmax = v_muminus[index]->dR(v_bs[index]->mom());
-	if ( v_muplus[index]->dR(v_bs[index]->mom()) > drmax ) drmax = v_muplus[index]->dR(v_bs[index]->mom());
-	if ( v_kplus[index]->dR(v_bs[index]->mom())  > drmax ) drmax = v_kplus[index]->dR(v_bs[index]->mom());
-	if ( v_kminus[index]->dR(v_bs[index]->mom()) > drmax ) drmax = v_kminus[index]->dR(v_bs[index]->mom());
+	double drmax = v_muminus[index]->dR(v_bs_mom[index]);
+	if ( v_muplus[index]->dR(v_bs_mom[index]) > drmax ) drmax = v_muplus[index]->dR(v_bs_mom[index]);
+	if ( v_kplus[index]->dR(v_bs_mom[index])  > drmax ) drmax = v_kplus[index]->dR(v_bs_mom[index]);
+	if ( v_kminus[index]->dR(v_bs_mom[index]) > drmax ) drmax = v_kminus[index]->dR(v_bs_mom[index]);
 	double sum = 0; double sum_drmax = 0; double sum_75 = 0;
     double sum_pv = 0; double sum_drmax_pv = 0; double sum_75_pv = 0;
 	for (PtlLstCIt piso = ptl_lst->begin(); piso != ptl_lst->end(); ++piso) {
 		Ptl* ptlIso = *piso;
 		if (ptlIso == v_muplus[index] || ptlIso == v_muminus[index] || ptlIso == v_kplus[index] || ptlIso == v_kminus[index])
 			continue;
-		double driso = ptlIso->dR(v_bs[index]->mom());
+		double driso = ptlIso->dR(v_bs_mom[index]);
 		if (driso <= 0.5)   sum += ptlIso->ptot();
 		if (driso <= drmax) sum_drmax += ptlIso->ptot();
 		if (driso <= 0.75)  sum_75 += ptlIso->ptot();
@@ -351,12 +377,12 @@ if (mc_finder)
         if (driso <= drmax) sum_drmax_pv += ptlIso->ptot();
         if (driso <= 0.75)  sum_75_pv += ptlIso->ptot();
 	}
-	bs_iso       = v_bs[index]->ptot() / (v_bs[index]->ptot() + sum);
-	bs_iso_drmax = v_bs[index]->ptot() / (v_bs[index]->ptot() + sum_drmax);
-	bs_iso_75    = v_bs[index]->ptot() / (v_bs[index]->ptot() + sum_75);
-    bs_iso_pv       = v_bs[index]->ptot() / (v_bs[index]->ptot() + sum_pv);
-    bs_iso_drmax_pv = v_bs[index]->ptot() / (v_bs[index]->ptot() + sum_drmax_pv);
-    bs_iso_75_pv    = v_bs[index]->ptot() / (v_bs[index]->ptot() + sum_75_pv);
+	bs_iso       = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum);
+	bs_iso_drmax = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_drmax);
+	bs_iso_75    = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_75);
+    bs_iso_pv       = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_pv);
+    bs_iso_drmax_pv = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_drmax_pv);
+    bs_iso_75_pv    = v_bs_ucpt[index] / (v_bs_ucpt[index] + sum_75_pv);
 
 	/* -- Intermediate vertex chi2 -- */
 	bs_jpsikp_chi2 = v_jpsi_kp_vrt[index]->chi2();

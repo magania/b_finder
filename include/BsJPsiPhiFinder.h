@@ -99,6 +99,7 @@ private:
 	VrtSaver vp_saver;
 
         vector<double> v_bs_ucpt;
+        vector<HepVector> v_bs_mom;
 	vector<int> v_jpsi_index, v_phi_index;
 	vector<Ptl*> v_bs, v_jpsi, v_muplus, v_muminus, v_kplus, v_kminus;
 	vector<Vrt*> v_bs_vrt, v_jpsi_kp_vrt, v_jpsi_km_vrt, v_bs_pv;
@@ -110,6 +111,7 @@ private:
 
 	/* -- Info missing by the savers -- */
 	double bs_mass, bs_mass_error, bs_lhtag, bs_pdl, bs_epdl;
+        double mu_plus_dR, mu_minus_dR, k_plus_dR, k_minus_dR;
 	double mu_plus_cpx, mu_plus_cpy, mu_plus_cpz;
 	double mu_minus_cpx, mu_minus_cpy, mu_minus_cpz;
 	double k_plus_cpx, k_plus_cpy, k_plus_cpz;
