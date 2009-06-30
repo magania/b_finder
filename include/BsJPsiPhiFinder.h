@@ -88,6 +88,8 @@ private:
 	static const double MASS_BS_MIN = 5.0;
 	static const double MASS_BS_MAX = 5.8;
 
+        AA::PtlBox _boxp;
+        AA::VrtBox _boxv;
 	int index;
 
 	JPsiFinder *jpsi_finder;

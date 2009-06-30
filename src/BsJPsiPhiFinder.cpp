@@ -75,17 +75,8 @@ BsJPsiPhiFinder::~BsJPsiPhiFinder() {
 }
 
 void BsJPsiPhiFinder::clean(){
-/*  for (int i = 0; i<v_bs.size(); i++)
-    delete v_bs[index];
-
-  for (int i = 0; i<v_bs_vrt.size(); i++)
-    delete v_bs_vrt[index];
-
-  for (int i = 0; i<v_jpsi_kp_vrt.size(); i++)
-    delete v_jpsi_kp_vrt[index];
-
-  for (int i = 0; i<v_jpsi_km_vrt.size(); i++)
-    delete v_jpsi_km_vrt[index];*/
+ _boxp.clear();
+ _boxv.clear();
 
         v_jpsi_index.clear();
 	v_phi_index.clear();
@@ -141,7 +132,7 @@ int BsJPsiPhiFinder::find(){
 		    track_list.push_back(muminus);
 		    track_list.push_back(kplus);
 		    track_list.push_back(kminus);
-		    Vrt *bs_vrt = new Vrt();  //***
+		    Vrt *bs_vrt = _boxv.newVrt();
 		    if (!bs_vrt->fill(jpsi->decayVertex()->x(), &track_list))
 		      continue;
 		    if (!bs_vrt->filter())
@@ -154,7 +145,7 @@ int BsJPsiPhiFinder::find(){
 		    jpsi_kp_track_list.push_back(muplus);
 		    jpsi_kp_track_list.push_back(muminus);
 		    jpsi_kp_track_list.push_back(kplus);
-		    Vrt* jpsi_kp_vrt = new Vrt(); //***
+		    Vrt* jpsi_kp_vrt = _boxv.newVrt();
 		    if (!jpsi_kp_vrt->fill(jpsi->decayVertex()->x(), &jpsi_kp_track_list) ||
 		    		!jpsi_kp_vrt->filter() ||
 		    		jpsi_kp_vrt->size() != 3)
@@ -164,14 +155,14 @@ int BsJPsiPhiFinder::find(){
 		    jpsi_km_track_list.push_back(muplus);
 		    jpsi_km_track_list.push_back(muminus);
 		    jpsi_km_track_list.push_back(kminus);
-		    Vrt* jpsi_km_vrt = new Vrt(); //***
+		    Vrt* jpsi_km_vrt = _boxv.newVrt();
 		    if (!jpsi_km_vrt->fill(jpsi->decayVertex()->x(), &jpsi_km_track_list) ||
 		    		!jpsi_km_vrt->filter() ||
 		    		jpsi_km_vrt->size() != 3)
 		        continue;
 
 		    /* -- Construct new particle (B) from these 4 tracks -- */
-		    Ptl* bs = new Ptl(); //***
+		    Ptl* bs = _boxp.newPtl();
 		    if (!bs->combine(bs_vrt, 0))
 		      continue;
 		    if (!bs->associateToVrt(&AA::vrtPBox))

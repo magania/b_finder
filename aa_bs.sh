@@ -3,7 +3,7 @@
 EXE_FILE=/home/magania/Bs/finder/bs_finder
 META_ELIST=/work/elsanto-clued0/magania/elists/jpsi_std/meta_elist
 OUT_DIR=/prj_root/2677/ckm_write/magania/bs
-LOCK_DIR=/prj_root/5002/magania/lock_bs
+LOCK_DIR=/prj_root/2677/ckm_write/magania/lock_bs/
 RECOVER=bs.root
 RECOVER1=bs_elist
 
