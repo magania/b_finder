@@ -1,5 +1,5 @@
 /*
- * BsJPsiFinder.cpp
+ * BsJPsiPhiFinder.cpp
  *
  *  Created on: Jun 22, 2009
  *      Author: magania
@@ -71,7 +71,6 @@ BsJPsiPhiFinder::BsJPsiPhiFinder(JPsiFinder *jpsi, PhiFinder *phi, TTree &tree, 
 }
 
 BsJPsiPhiFinder::~BsJPsiPhiFinder() {
-	// TODO Auto-generated destructor stub
 }
 
 void BsJPsiPhiFinder::clean(){
@@ -167,7 +166,7 @@ int BsJPsiPhiFinder::find(){
 		      continue;
 		    if (!bs->associateToVrt(&AA::vrtPBox))
 		      continue;
-                      
+
                     /* -- Save the original bs pt -- */
 //                    double tmp_ucpt = bs->pt();
 		    HepVector tmp_bsmom = bs->mom();
@@ -260,8 +259,8 @@ int BsJPsiPhiFinder::find(){
              * vector<double> v_kminus_cpx, v_kminus_cpy, v_kminus_cpz;
 		     */
 
-                    //std::cout << "Bs: " << v_bs.size() 
-                    //          << " JPsi: " << jpsi_finder->getIndex() 
+                    //std::cout << "Bs: " << v_bs.size()
+                    //          << " JPsi: " << jpsi_finder->getIndex()
                     //          << " Phi:" << phi_finder->getIndex() << std::endl;
 		    v_jpsi_index.push_back(jpsi_finder->getIndex());
 		    v_phi_index.push_back(phi_finder->getIndex());
@@ -412,7 +411,7 @@ if (mc_finder)
         k_minus_cpt = sqrt(v_kminus_cpx[index]*v_kminus_cpx[index] + v_kminus_cpy[index]*v_kminus_cpy[index]);
         jpsi_cpt = sqrt( (v_muplus_cpx[index]+v_muminus_cpx[index])*(v_muplus_cpx[index]+v_muminus_cpx[index])
                          + (v_muplus_cpy[index]+v_muminus_cpy[index])*(v_muplus_cpy[index]+v_muminus_cpy[index]) );
-        phi_cpt  = sqrt( (v_kplus_cpx[index]+v_kminus_cpx[index])*(v_kplus_cpx[index]+v_kminus_cpx[index])  
+        phi_cpt  = sqrt( (v_kplus_cpx[index]+v_kminus_cpx[index])*(v_kplus_cpx[index]+v_kminus_cpx[index])
                          + (v_kplus_cpy[index]+v_kminus_cpy[index])*(v_kplus_cpy[index]+v_kminus_cpy[index]) );
 }
 
