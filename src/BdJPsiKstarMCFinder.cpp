@@ -26,7 +26,7 @@ bool BdJPsiKstarMCFinder::find(){
 			-13, &muplus_gen, 13, &muminus_gen,
 			321, &kaon_gen, -211,&pion_gen);
 	mc_nbdbar = DecayMC::findAndAsignDecay(-511, &bd_gen,
-			443, &jpsi_gen, 313, &kstar_gen,
+			443, &jpsi_gen, -313, &kstar_gen,
 			-13, &muplus_gen, 13, &muminus_gen,
 			-321, &kaon_gen,211, &pion_gen);
 	mc_run = runNumber;

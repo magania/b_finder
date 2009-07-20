@@ -70,8 +70,11 @@ int KstarFinder::find(){
 			double masa_kp = ptl->mass(AA::K_PLUS, AA::PI_MINUS);
 			double masa_pk = ptl->mass(AA::PI_PLUS, AA::K_MINUS);
 
+//std::cout << MASS_KSTAR_MIN << '-' << MASS_KSTAR_MAX << " Mass (kp,pk):" << masa_kp << ' ' << masa_pk << std::endl;
+//std::cout << "P1 pt " <<(*p1)->pt() << "  P2 pt " << (*p2)->pt() << std::endl;
 			if (MASS_KSTAR_MIN < masa_kp && masa_kp < MASS_KSTAR_MAX &&
 					(*p1)->pt() > KAON_MINIMUM_PT && (*p2)->pt() > PION_MINIMUM_PT){
+//				std::cout << "Kaon Pion" << std::endl;
 				kstar.push_back(ptl);
 				vtx.push_back(pve);
 				mass.push_back(masa_kp);
@@ -81,14 +84,15 @@ int KstarFinder::find(){
 
 			if (MASS_KSTAR_MIN < masa_pk && masa_pk < MASS_KSTAR_MAX &&
 					(*p1)->pt() > PION_MINIMUM_PT && (*p2)->pt() > KAON_MINIMUM_PT){
+//  			       std::cout << "Pion Kaon" << std::endl;
 				kstar.push_back(ptl);
 				vtx.push_back(pve);
-				mass.push_back(masa_kp);
+				mass.push_back(masa_pk);
 				pion.push_back(*p1);
 				kaon.push_back(*p2);
 			}
 		}
-
+//std::cout << "Kstar: " << kstar.size() << std::endl;
 	return kstar.size();
 }
 

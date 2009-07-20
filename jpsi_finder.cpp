@@ -1,22 +1,19 @@
 /*
- * bd_finder.cpp
+ * jpsi_finder.cpp
  *
  *  Created on: Jul 17, 2009
  *      Author: magania
  */
 
 #include <AA.hpp>
+#include <Monitor.hpp>
+#include <DST.hpp>
+#include <Field.hpp>
+#include <Spot.hpp>
 
 #include <TTree.h>
-#include <TFile.h>
 
-#include "EvtSaver.h"
 #include "JPsiFinder.h"
-#include "KstarFinder.h"
-#include "BdJPsiKstarFinder.h"
-#ifdef MC
-#include "BdJPsiKstarMCFinder.h"
-#endif
 
 void params() {
 	//Parameters for Real Data and MC
@@ -45,11 +42,11 @@ void params() {
 
 	// :)
 	AA::findPVFlag = true;
-	AA::findV0Flag = true;
+	AA::findV0Flag = false;
 	AA::findCascadeFlag = false;
-	AA::findJetsFlag = true;
+	AA::findJetsFlag = false;
 	AA::findJPsiFlag = true;
-	AA::findSVFlag = true;
+	AA::findSVFlag = false;
 }
 
 void start_ana(int argc, char** argv) {
@@ -98,30 +95,15 @@ bool nextEvent() {
 
 int main(int argc, char** argv) {
 	start_ana(argc, argv);
-	/* -- We will save all in this tree --*/
-	TFile root_file("bd.root", "RECREATE");
-	TTree tree("tree", "all info.");
-#ifdef MC
-	TTree treeMC("treeMC", "all mc info.");
-#endif
-	EvtSaver evt_saver(tree);
+
+	TTree tree("tree", "all info.");	
 	JPsiFinder jpsi_finder(tree);
-	KstarFinder kstar_finder(tree);
-#ifdef MC
-	BdJPsiKstarMCFinder mc_finder(tree, treeMC);
-	BdJPsiKstarFinder bd_finder(&jpsi_finder, &kstar_finder, tree, &mc_finder);
-#else
-	BdJPsiKstarFinder bd_finder(&jpsi_finder, &kstar_finder, tree);
-#endif
 
 	/* -- Initilization of geometry, field and beam spot.
 	 * Should be done after the fileLst or eventLst initilization -- */
 	AA::det.input();
 	AA::field.input();
 	AA::spot.input();
-#if defined(P17) || defined(MC)
-//	AA:ipcalib.input();
-#endif
 	AA::newEvent();
 	AA::newAnaEvent();
 	AA::newSelectEvent();
@@ -131,36 +113,12 @@ int main(int argc, char** argv) {
 		AA::spot.set();
 		AA::analyse();
 		AA::select(AA::TAG);
-                //std::cout << "Run:" << AA::runNumber << " Evt: "  << AA::evtNumber << std::endl;
-#ifdef MC
-        mc_finder.find();
-		treeMC.Fill();
-#endif
 		if (!jpsi_finder.find())
 			continue;
-		//std::cout << "JPsi" << std::endl;
-		if (!kstar_finder.find())
-			continue;
-                //std::cout << "Phi" << std::endl;
-
-		if (!bd_finder.find())
-			continue;
-
-		bd_finder.begin();
-		while (bd_finder.next()){
-			bd_finder.fill();
-			evt_saver.fill();
-			tree.Fill();
-		}
-		dst.outEventLst("bd_elist");
+		AA::dst.outEventLst("jpsi_elist");
 	}//End while next event.
 
-	tree.Write();
-#ifdef MC
-	treeMC.Write();
-#endif
-	root_file.Write();
-	root_file.Close();
-	std::cout << argv[0] << " II: bd_finder ended succesfully." << std::endl;
+	AA::dst.releaseOutEventLists();
+	std::cout << argv[0] << " II: jpsi_finder ended succesfully." << std::endl;
 	std::exit(EXIT_SUCCESS);
 }

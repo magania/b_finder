@@ -55,8 +55,8 @@ private:
 
 	int index;
 
-	const static double MASS_KSTAR_MIN = 891.66 - 10 * 0.01; //TODO Fit this width
-	const static double MASS_KSTAR_MAX = 891.66 + 10 * 0.01;
+	const static double MASS_KSTAR_MIN = 0.89166 - 10 * 0.0356; // Obtained from MC
+	const static double MASS_KSTAR_MAX = 0.89166 + 10 * 0.0356;
 
 	const static double KAON_MINIMUM_PT = 0.4;
 	const static double PION_MINIMUM_PT = 0.4;

@@ -1,5 +1,5 @@
-AA=/home/magania/src32/aatrack/AA
-DFLAGS=MC
+AA=/home/magania/Bs/aatrack/P21/AA
+DFLAGS=P21
 #----------------- aatrack ---------------
 #AAMC=/home/magania/Bs/aatrack/P17/AA
 #AA17=/home/magania/Bs/aatrack/P17/AA
@@ -31,7 +31,7 @@ FLAGS = $(ROOTCFLAGS) -m32
 
 
 MYLIBS = obj/DecayMC.o obj/BdJPsiKstarFinder.o obj/BdJPsiKstarMCFinder.o obj/BsJPsiPhiFinder.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/KstarFinder.o obj/VrtSaver.o obj/TagSaver.o 
-all: bs_finder bd_finder
+all: bs_finder bd_finder jpsi_finder
 
 obj/%.o : src/%.cpp include/%.h
 	g++ $(INCLUDES) -g -o $@ -c $<
@@ -46,6 +46,10 @@ bs_finder : bs_finder.cpp $(MYLIBS) $(AATRACK)
 bd_finder : bd_finder.cpp $(MYLIBS) $(AATRACK)
 	g++ $(INCLUDES) -D$(DFLAGS) -g -o obj/bd_finder.o -c $<
 	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bd_finder_${DFLAGS} obj/bd_finder.o $(MYLIBS) $(AATRACK)
+
+jpsi_finder : jpsi_finder.cpp $(MYLIBS) $(AATRACK)
+	g++ $(INCLUDES) -D$(DFLAGS) -g -o obj/jpsi_finder.o -c $<
+	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o jpsi_finder_${DFLAGS} obj/jpsi_finder.o $(MYLIBS) $(AATRACK)
 
 #bs_mcfinder : bs_finder.cpp $(MYLIBS) $(AATRACK)
 #	g++ $(INCLUDES) -g -DMC -o obj/bs_mcfinder.o -c $<
