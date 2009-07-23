@@ -194,19 +194,19 @@ PtlMC* DecayMC::getParent(PtlMC* p) {
 }
 
 /* Busca la particula en el MC a nivel generacion mas parecida a p*/
-PtlMC* DecayMC::imatch(Ptl* p) {
+PtlMC* DecayMC::imatch(Ptl* p, double &chi_min) {
 	TrkLst lst;
 	lst.push_back(p->track());
 
 	Trk* p_t;
 	double chi = 100;
-	double chi_min = 100;
+	chi_min = 100;
 	PtlMC* m = 0;
 	for (PtlMCLstCIt pmc = ptlMCBox.particles()->begin(); pmc
 			!= ptlMCBox.particles()->end(); ++pmc) {
 		(*pmc)->associate(lst, p_t, chi);
 		if (chi < chi_min) {
-			chi = chi_min;
+			chi_min = chi;
 			m = (*pmc);
 		}
 	}

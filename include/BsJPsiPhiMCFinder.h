@@ -21,6 +21,7 @@ private:
 	PtlMC *bs_gen, *jpsi_gen, *muplus_gen, *muminus_gen, *phi_gen, *kplus_gen, *kminus_gen;
 	Ptl *muplus_reco, *muminus_reco, *kplus_reco, *kminus_reco;
 
+ 	double match_muplus_chi2, match_muminus_chi2, match_kplus_chi2, match_kminus_chi2;
 };
 
 #endif /* BSJPSIPHIMCFINDER_H_ */

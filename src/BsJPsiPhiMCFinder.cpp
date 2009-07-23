@@ -14,10 +14,13 @@ BsJPsiPhiMCFinder::BsJPsiPhiMCFinder(TTree &tree, TTree &treeMC) {
 	treeMC.Branch("mc_evt", &mc_evt, "mc_evt/I");
 	treeMC.Branch("mc_match", &mc_match, "mc_match/I");
 
-//	tree.Branch("mc_inverse", &mc_inverse, "mc_inverse/I");
+        tree.Branch("match_muplus_chi2",  &match_muplus_chi2,  "match_muplus_chi2/D");
+        tree.Branch("match_muminus_chi2", &match_muminus_chi2, "match_muminus_chi2/D");
+        tree.Branch("match_kplus_chi2",   &match_kplus_chi2,   "match_kplus_chi2/D");
+        tree.Branch("match_kminus_chi2",  &match_kminus_chi2,   "match_kminus_chi2/D");
+
 	tree.Branch("mc_match", &mc_match, "mc_match/I");
 	tree.Branch("mc_match_sw", &mc_match_sw, "mc_match_sw/I");
-//        tree.Branch("mc_match_fw", &mc_match_fw, "mc_match_fw/I");
 }
 
 bool BsJPsiPhiMCFinder::find(){
@@ -29,6 +32,13 @@ bool BsJPsiPhiMCFinder::find(){
 			443, &jpsi_gen, 333, &phi_gen,
 			-13, &muplus_gen, 13, &muminus_gen,
 			-321, &kplus_gen,321, &kminus_gen);
+	if ( mc_nbs == 0 && mc_nbsbar ==0 ){
+	        muplus_gen=0;
+	        muminus_gen=0;
+	        kplus_gen=0;
+	        kminus_gen=0;
+	}
+
 	mc_run = runNumber;
 	mc_evt = evtNumber;
         mc_match = 0;
@@ -42,20 +52,24 @@ bool BsJPsiPhiMCFinder::find(){
 }
 
 void BsJPsiPhiMCFinder::fill(Ptl* muplus, Ptl* muminus, Ptl* kplus, Ptl* kminus){
-//	PtlMC*  muplus_inv, *muminus_inv, *kplus_inv, *kminus_inv;
-//	muplus_inv = 0; muminus_inv = 0; kplus_inv = 0; kminus_inv = 0;
-//	muplus_inv  = DecayMC::imatch(muplus);
-//	muminus_inv = DecayMC::imatch(muminus);
-//    kplus_inv   = DecayMC::imatch(kplus);
-//    kminus_inv  = DecayMC::imatch(kminus);
+	PtlMC*  muplus_inv, *muminus_inv, *kplus_inv, *kminus_inv;
+	muplus_inv = 0; muminus_inv = 0; kplus_inv = 0; kminus_inv = 0;
+	muplus_inv  = DecayMC::imatch(muplus, match_muplus_chi2);
+	muminus_inv = DecayMC::imatch(muminus, match_muminus_chi2);
+        kplus_inv   = DecayMC::imatch(kplus, match_kplus_chi2);
+        kminus_inv  = DecayMC::imatch(kminus, match_kminus_chi2);
 
-//    mc_inverse = (int)(muplus_inv && muminus_inv && kplus_inv && kminus_inv);
-//    mc_match =   (int)(muplus_inv == muplus_gen && muminus_inv == muminus_gen
-//    		        && kplus_inv == kplus_gen && kminus_inv == kminus_inv);
-//    mc_match_sw = (int)(muplus_inv == muplus_gen && muminus_inv == muminus_gen
-//    	           	 && kplus_inv == kminus_gen && kminus_inv == kplus_inv);
-    mc_match = (int)(muplus == muplus_reco && muminus == muminus_reco
-                         && kplus == kplus_reco && kminus == kminus_reco);
-    mc_match_sw = (int)(muplus == muplus_reco && muminus == muminus_reco
-                         && kplus == kminus_reco && kminus == kplus_reco);
+       if (muplus_inv && muminus_inv && kplus_inv && kminus_inv) {
+	    mc_match    =(int)(muplus_inv == muplus_gen && muminus_inv == muminus_gen
+    	  	               && kplus_inv == kplus_gen && kminus_inv == kminus_gen);
+	    mc_match_sw =(int)(muplus_inv == muplus_gen && muminus_inv == muminus_gen
+    	           	       && kplus_inv == kminus_gen && kminus_inv == kplus_gen);
+	} else {
+	 	mc_match=0;
+		mc_match_sw=0;
+	}
+//    mc_match = (int)(muplus == muplus_reco && muminus == muminus_reco
+//                         && kplus == kplus_reco && kminus == kminus_reco);
+//    mc_match_sw = (int)(muplus == muplus_reco && muminus == muminus_reco
+//                         && kplus == kminus_reco && kminus == kplus_reco);
 }

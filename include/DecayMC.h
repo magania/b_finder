@@ -59,7 +59,7 @@ public:
   static PtlMC* getParent(PtlMC* p);
 
   /* Busca la particula en el MC a nivel generacion mas parecida a p*/
-  static PtlMC* imatch(Ptl* p);
+  static PtlMC* imatch(Ptl* p, double &chi_min);
 
   static int getIdPdg(PtlMC* p);
   static int getIndex(PtlMC* p);
