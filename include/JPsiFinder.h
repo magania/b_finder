@@ -52,8 +52,8 @@ private:
 
 	int index;
 
-	static const double JPSI_WINDOW_MIN = 3.096 - 5 * 0.0693458; // Sigma from MC
-	static const double JPSI_WINDOW_MAX = 3.096 + 5 * 0.0693458;
+	static const double JPSI_WINDOW_MIN = 3.096 - 10 * 0.0693458; // Sigma from MC last was 5sigmas
+	static const double JPSI_WINDOW_MAX = 3.096 + 10 * 0.0693458;
 };
 
 #endif /* JPSIFINDER_H_ */
