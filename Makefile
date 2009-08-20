@@ -1,4 +1,4 @@
-AA=/home/magania/Bs/aatrack/P21/AA
+AA=/home/magania/src/aatrack/AA
 DFLAGS=P21
 #----------------- aatrack ---------------
 #AAMC=/home/magania/Bs/aatrack/P17/AA
@@ -8,9 +8,11 @@ DFLAGS=P21
 #AA=$(AA21)
 #DFLAGS=P21
 
+ZLIB_DIR=/lib32
+
 #INCLUDES = -I$(CERNSOURCE_DIR)/cosrc/include -I $(AA)/CLHEP -I $(AA)/src -I $(AA)
 AAINCLUDE = -I $(AA)/CLHEP -I $(AA)/src -I $(AA)
-AALIBS = -L $(AA)/lib -lAA -lAna -lPhy -lCLHEP -L$(ZLIB_DIR)/lib -lz
+AALIBS = -L $(AA)/lib -lAA -lAna -lPhy -lCLHEP -L$(ZLIB_DIR) -lz
 AATRACK = $(AA)/lib/libAA.a $(AA)/lib/libAna.a $(AA)/lib/libPhy.a $(AA)/lib/libCLHEP.a
 
 #---------------- root  ------------------
@@ -30,26 +32,35 @@ LIBS = $(AALIBS) $(ROOTLIBS) -lm#-lg2c -lm
 FLAGS = $(ROOTCFLAGS) -m32 
 
 
-MYLIBS = obj/DecayMC.o obj/BdJPsiKstarFinder.o obj/BdJPsiKstarMCFinder.o obj/BsJPsiPhiFinder.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/KstarFinder.o obj/VrtSaver.o obj/TagSaver.o 
-all: bs_finder bd_finder jpsi_finder
+MYLIBS = obj/DecayMC.o obj/BdJPsiKstarFinder.o obj/BdJPsiKstarMCFinder.o obj/BsJPsiPhiFinder.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/KstarFinder.o obj/VrtSaver.o obj/TagSaver.o obj/PtlFinder.o obj/BhhFinder.o 
+#all: bs_finder bd_finder jpsi_finder hh_finder
+all: b2mu_ana;
 
 obj/%.o : src/%.cpp include/%.h
-	g++ $(INCLUDES) -g -o $@ -c $<
+	g++ -m32  $(INCLUDES) -g -o $@ -c $<
 
 $(MYLIBS): obj/%.o : src/%.cpp include/%.h
-	g++ $(INCLUDES) -g -o $@ -c $<
+	g++ -m32 $(INCLUDES) -g -o $@ -c $<
+
+hh_finder : hh_finder.cpp $(MYLIBS) $(AATRACK)
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/hh_finder.o -c $<
+	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -g -o hh_finder obj/hh_finder.o $(MYLIBS) $(AATRACK)
 	
 bs_finder : bs_finder.cpp $(MYLIBS) $(AATRACK)
-	g++ $(INCLUDES) -D$(DFLAGS) -g -o obj/bs_finder.o -c $<
-	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bs_finder_${DFLAGS} obj/bs_finder.o $(MYLIBS) $(AATRACK)
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/bs_finder.o -c $<
+	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bs_finder_${DFLAGS} obj/bs_finder.o $(MYLIBS) $(AATRACK)
 
 bd_finder : bd_finder.cpp $(MYLIBS) $(AATRACK)
-	g++ $(INCLUDES) -D$(DFLAGS) -g -o obj/bd_finder.o -c $<
-	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bd_finder_${DFLAGS} obj/bd_finder.o $(MYLIBS) $(AATRACK)
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/bd_finder.o -c $<
+	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o bd_finder_${DFLAGS} obj/bd_finder.o $(MYLIBS) $(AATRACK)
 
 jpsi_finder : jpsi_finder.cpp $(MYLIBS) $(AATRACK)
-	g++ $(INCLUDES) -D$(DFLAGS) -g -o obj/jpsi_finder.o -c $<
-	g++ $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o jpsi_finder_${DFLAGS} obj/jpsi_finder.o $(MYLIBS) $(AATRACK)
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/jpsi_finder.o -c $<
+	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o jpsi_finder_${DFLAGS} obj/jpsi_finder.o $(MYLIBS) $(AATRACK)
+
+b2mu_ana : b2mu_ana.cpp $(MYLIBS) $(AATRACK)
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/b2mu_ana.o -c $<
+	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -D$(DFLAGS) -g -o b2mu_ana obj/b2mu_ana.o $(MYLIBS) $(AATRACK)
 
 #bs_mcfinder : bs_finder.cpp $(MYLIBS) $(AATRACK)
 #	g++ $(INCLUDES) -g -DMC -o obj/bs_mcfinder.o -c $<
