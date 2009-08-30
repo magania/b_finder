@@ -22,7 +22,7 @@
 
 class GammaFinder {
 public:
-	GammaFinder(TTree &tree);
+	GammaFinder(TTree &tree,bool two = false);
 	virtual ~GammaFinder();
 
 	int find();
@@ -37,6 +37,7 @@ public:
 	AA::Vrt& getVrt();
 	double getMass();
 	void fill();
+	void fill(int, int);
 
 private:
 	AA::PtlBox _boxp;
@@ -44,9 +45,14 @@ private:
 
 	void clean();
 
+	bool _two;
 	double tree_gamma_mass;
+	double tree_gamma2_mass;
+	int index2;
 	PtlSaver e_plus_saver, e_minus_saver, gamma_saver;
     VrtSaver vrt_saver;
+	PtlSaver *e2_plus_saver, *e2_minus_saver, *gamma2_saver;
+    VrtSaver *vrt2_saver;
 
 	std::vector<AA::Ptl*> gamma, e_plus, e_minus;
 	std::vector<AA::Vrt*> vtx;
