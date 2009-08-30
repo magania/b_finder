@@ -53,7 +53,7 @@ private:
 	void clean();
 
 	PtlSaver x_saver;
-	VrtSaver vrt_saver, pv_saver;
+	VrtSaver vrt_saver;
 	std::vector<Ptl*> X;
 	std::vector<int> upsilon, gamma;
 	std::vector<AA::Vrt*> vtx;

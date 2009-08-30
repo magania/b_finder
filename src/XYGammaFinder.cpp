@@ -8,15 +8,14 @@
 #include "XYGammaFinder.h"
 
 XYGammaFinder::XYGammaFinder(TTree &tree, UpsilonFinder& upsilon_finder, GammaFinder& gamma_finder) :
-	x_saver("b",tree, false, false),
-	vrt_saver("b_vrt",tree),
-	pv_saver("b_pv",tree)
+	x_saver("x",tree, false, false),
+	vrt_saver("x_vrt",tree)
 {
 	_upsilon_finder = &upsilon_finder;
 	_gamma_finder = &gamma_finder;
 	index = -1;
-	tree.Branch("b_index", &index, "b_index/D");
-	tree.Branch("b_mass", &masa, "b_mass/D");
+	tree.Branch("x_index", &index, "x_index/D");
+	tree.Branch("x_mass", &masa, "x_mass/D");
 }
 
 XYGammaFinder::~XYGammaFinder() {
@@ -112,10 +111,12 @@ void XYGammaFinder::setIndex(int i){
 }
 
 AA::Ptl& XYGammaFinder::getUpsilon(){
+	_upsilon_finder->setIndex(upsilon[index]);
 	return _upsilon_finder->getUpsilon();
 }
 
 AA::Ptl& XYGammaFinder::getGamma(){
+	_gamma_finder->setIndex(gamma[index]);
 	return _gamma_finder->getGamma();
 }
 
