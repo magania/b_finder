@@ -1,4 +1,4 @@
-AA=/home/magania/src/aatrack/AA
+AA=/home/magania/.yp/aatrack/AA
 DFLAGS=P21
 #----------------- aatrack ---------------
 #AAMC=/home/magania/Bs/aatrack/P17/AA

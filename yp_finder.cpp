@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
 /* ================================        MAIN       ===================================*/
 	/* -- We will save all in this tree --*/
-	TFile root_file("up.root", "RECREATE");
+	TFile root_file("yp.root", "RECREATE");
 	TTree tree("tree", "all info.");
 	TTree *treeMC=0;
 
@@ -187,7 +187,7 @@ if (mc)
 			evt_saver.fill();
 			tree.Fill();
 		}
-		AA::dst.outEventLst("up_elist");
+		AA::dst.outEventLst("yp_elist");
 	}//End while next event.
 
 	tree.Write();

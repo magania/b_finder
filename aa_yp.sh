@@ -1,11 +1,11 @@
 #!/bin/bash
 
-EXE_FILE=/home/magania/Bd/finder/jpsi_finder
+EXE_FILE=/home/magania/.yp/finder/yp_finder
 META_ELIST=/work/tlaloc-clued0/magania/elists/aadst/meta_elist
-OUT_DIR=/prj_root/2677/ckm_write/magania/jpsi
-LOCK_DIR=/prj_root/2677/ckm_write/magania/lock_jpsi/
-RECOVER=jpsi_elist
-#RECOVER1=bs_elist
+OUT_DIR=/prj_root/2677/ckm_write/magania/yp
+LOCK_DIR=/prj_root/2677/ckm_write/magania/yp_lock
+RECOVER=yp.root
+RECOVER1=yp_elist
 
 ROOT_DIR=/prj_root/2677/ckm_write/magania/local/root
 
@@ -59,7 +59,7 @@ function set_workspace {
 # scp $MIRROR.fnal.gov:${EXE_FILE}_P14 P14/aa_do 
 # scp $MIRROR.fnal.gov:${EXE_FILE}_P17 P17/aa_do
 # scp $MIRROR.fnal.gov:${EXE_FILE}_P20 P20/aa_do
- scp $MIRROR.fnal.gov:${EXE_FILE}_P21 P21/aa_do
+ scp $MIRROR.fnal.gov:${EXE_FILE} P21/aa_do
  scp $MIRROR.fnal.gov:${META_ELIST} meta_elist
 
  echo "Workspace set."
@@ -70,8 +70,9 @@ n_meta_elist=`cat meta_elist | wc -l`
 n_choose=0
 
 while [ true ];do
- MISSING=`ls -1 $OUT_DIR | grep $RECOVER | cut -d. -f2 | sort -n -u | awk '{while (n!=$1){print n++};n++ } END{while(n<'$n_meta_elist'){print n++}}'`
-#  echo $MISSING
+ #echo "ls -1 $OUT_DIR | grep $RECOVER | cut -d. -f2 | sort -n -u | awk '{while (n!=$1){print n++};n++ } END{while(n<'$n_meta_elist'){print n++}}'"
+ MISSING=`ls -1 $OUT_DIR | grep $RECOVER | cut -d. -f3 | sort -n -u | awk '{while (n!=$1){print n++};n++ } END{while(n<'$n_meta_elist'){print n++}}'`
+ # echo $MISSING
  n_missing=`echo $MISSING | wc -w`
  echo Total $n_meta_elist Missing $n_missing
 
@@ -122,12 +123,12 @@ function copy_elist {
 
 function do_task {
  echo "Working ..."
- ./aa_do f file > aa.out
+ ./aa_do -i file > aa.out
 }
 
 function send_result {
  mv $RECOVER $OUT_DIR/$RECOVER.$n_choose.$MYID
-# mv $RECOVER1 $OUT_DIR/$RECOVER1.$n_choose.$MYID
+ mv $RECOVER1 $OUT_DIR/$RECOVER1.$n_choose.$MYID
  mv aa.out $OUT_DIR/out.$n_choose.$MYID
  rm $LOCK_DIR/lock.$NLOCK
 }
