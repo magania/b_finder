@@ -48,6 +48,8 @@ private:
 	bool _two;
 	double tree_gamma_mass;
 	double tree_gamma2_mass;
+	double tree_gamma_masskk;
+	double tree_gamma2_masskk;
 	int index2;
 	PtlSaver e_plus_saver, e_minus_saver, gamma_saver;
     VrtSaver vrt_saver;

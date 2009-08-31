@@ -16,10 +16,12 @@ GammaFinder::GammaFinder(TTree &tree, bool two) :
 	_two = two;
 	index = -1;
 	tree.Branch("gamma_mass", &tree_gamma_mass, "gamma_mass/D");
+	tree.Branch("gamma_mass_kk", &tree_gamma_masskk, "gamma_mass_kk/D");
 	tree.Branch("gamma_index", &index, "gamma_index/D");
 
 	if (_two){
 		tree.Branch("gamma2_mass", &tree_gamma2_mass, "gamma2_mass/D");
+		tree.Branch("gamma2_mass_kk", &tree_gamma2_masskk, "gamma2_mass_kk/D");
 		tree.Branch("gamma2_index", &index2, "gamma2_index/D");
 		e2_plus_saver = new PtlSaver("e2_plus",tree, true, false);
 		e2_minus_saver = new PtlSaver("e2_minus",tree, true, false);
@@ -144,6 +146,7 @@ void GammaFinder::fill(){
 	gamma_saver.fill(getGamma());
 	tree_gamma_mass = getMass();
 	vrt_saver.fill(getVrt());
+	tree_gamma_masskk = getGamma().mass(AA::K_PLUS, AA::K_MINUS);
 }
 
 void GammaFinder::fill(int i, int j){
@@ -154,12 +157,14 @@ void GammaFinder::fill(int i, int j){
 		gamma_saver.fill(getGamma());
 		tree_gamma_mass = getMass();
 		vrt_saver.fill(getVrt());
+		tree_gamma_masskk = getGamma().mass(AA::K_PLUS, AA::K_MINUS);
 		setIndex(j);
 		e2_plus_saver->fill(getEPlus());
 		e2_minus_saver->fill(getEMinus());
 		gamma2_saver->fill(getGamma());
 		tree_gamma2_mass = getMass();
 		vrt2_saver->fill(getVrt());
+		tree_gamma2_masskk = getGamma().mass(AA::K_PLUS, AA::K_MINUS);
 		index2=j;
 	} else {
 		fill();

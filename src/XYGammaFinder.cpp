@@ -45,6 +45,9 @@ int XYGammaFinder::find(){
 			Ptl *e_plus_ptl = &_gamma_finder->getEPlus();
 			Ptl *e_minus_ptl = &_gamma_finder->getEMinus();
 
+			if(mu_plus_ptl == e_plus_ptl || mu_minus_ptl == e_minus_ptl)
+				continue;
+
 		    /* -- x vertex -- */
 		    TrkLst track_list;
 		    track_list.push_back(mu_plus_ptl);
