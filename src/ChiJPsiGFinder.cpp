@@ -118,9 +118,29 @@ AA::Ptl& ChiJPsiGFinder::getJPsi(){
 	return _jpsi_finder->getJPsi();
 }
 
+AA::Ptl& ChiJPsiGFinder::getMuPlus(){
+	_jpsi_finder->setIndex(jpsi[index]);
+	return _jpsi_finder->getMuPlus();
+}
+
+AA::Ptl& ChiJPsiGFinder::getMuMinus(){
+	_jpsi_finder->setIndex(jpsi[index]);
+	return _jpsi_finder->getMuMinus();
+}
+
 AA::Ptl& ChiJPsiGFinder::getGamma(){
 	_gamma_finder->setIndex(gamma[index]);
 	return _gamma_finder->getGamma();
+}
+
+AA::Ptl& ChiJPsiGFinder::getEPlus(){
+	_gamma_finder->setIndex(gamma[index]);
+	return _gamma_finder->getEPlus();
+}
+
+AA::Ptl& ChiJPsiGFinder::getEMinus(){
+	_gamma_finder->setIndex(gamma[index]);
+	return _gamma_finder->getEMinus();
 }
 
 AA::Ptl& ChiJPsiGFinder::getChi(){

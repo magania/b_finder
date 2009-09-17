@@ -53,6 +53,19 @@ bool PtlFinder::next(){
 	return false;
 }
 
+int PtlFinder::getIndex(){
+	return index;
+}
+
+void PtlFinder::setIndex(int i){
+	if ( i > ptl_vector.size()  || i < 0){
+		std::cout << "PtlFinder: Error seting index " << i << " max: " << ptl_vector.size() << std::endl;
+		exit(EXIT_FAILURE);
+	} else {
+		index = i;
+	}
+}
+
 AA::Ptl& PtlFinder::getPtl(){
 	return *ptl_vector[index];
 }

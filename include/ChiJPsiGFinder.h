@@ -37,7 +37,11 @@ public:
 	void setIndex(int i);
 
 	AA::Ptl& getJPsi();
+	AA::Ptl& getMuPlus();
+	AA::Ptl& getMuMinus();
 	AA::Ptl& getGamma();
+	AA::Ptl& getEPlus();
+	AA::Ptl& getEMinus();
 	AA::Ptl& getChi();
 	AA::Vrt& getVrt();
 	double getMass();
