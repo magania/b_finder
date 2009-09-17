@@ -72,7 +72,12 @@ int GammaFinder::find(){
 				continue;
 			}
 
-			Double_t gamma_vtx_r = sqrt(vrt.x(1)*vrt.x(1) + vrt.x(2)*vrt.x(2));
+			if (!ptl->associateToVrt(&AA::vrtPBox))
+				continue;
+			
+			const AA::Vrt* pv = ptl->primaryVertex();
+			Double_t gamma_vtx_r = sqrt( (vrt.x(1)-pv->x(1))*(vrt.x(1)-pv->x(1)) + (vrt.x(2)-pv->x(2))*(vrt.x(2)-pv->x(2)) );
+			
 			if (gamma_vtx_r < R_ORIGIN_MIN || gamma_vtx_r > R_ORIGIN_MAX)
 				continue;
 

@@ -64,7 +64,7 @@ private:
 
 	static const double MASS_GAMMA_MAX = 0.100;
 
-	static const double R_ORIGIN_MIN = 1.5;
+	static const double R_ORIGIN_MIN = 0.1;
 	static const double R_ORIGIN_MAX = 15.0;
 };
 
