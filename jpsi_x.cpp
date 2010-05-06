@@ -127,18 +127,24 @@ int main(int argc, char** argv) {
          std::cout << histo_bins[i] << " ";
         std::cout << std::endl;
 
+        
+        TH2D *jpsi_histo = new TH2D("jpsi_histo", "jpsi_histo", 2*n_bins+1, histo_bins, 100, 0.0, 6.28);
 	while (nextEvent()) {
-                if (evc++ > 1000) break;
+                if (evc++ > 10000) break;
 		AA::setField(); //define beam-spot and field value
 		AA::spot.set();
 		AA::analyse();
 		AA::select(AA::TAG);
 		if (!jpsi_finder.find())
 			continue;
-
+                while (jpsi_finder.next()){
+                  jpsi_histo->Fill(jpsi_finder.getMuPlus().q()*jpsi_finder.getMuPlus().pt(), jpsi_finder.getMuPlus().phi());
+                  jpsi_histo->Fill(jpsi_finder.getMuMinus().q()*jpsi_finder.getMuMinus().pt(), jpsi_finder.getMuMinus().phi());
+		}
+/*
 		TString name = "histo_";
                 name+= evc;   	        
-                TH2D *histo = new TH2D(name, name, 2*n_bins+1, histo_bins, 100, -6.14, 6.14);
+                TH2D *histo = new TH2D(name, name, 2*n_bins+1, histo_bins, 100, 0.0, 6.28);
                 const AA::PtlLst ptl_lst = *AA::ptlBox.particles();
                 //if (ptl_lst.size() < 250 ) continue;
  	        for (AA::PtlLstCIt p = ptl_lst.begin(); p != ptl_lst.end(); ++p){
@@ -147,6 +153,7 @@ int main(int argc, char** argv) {
                   //std::cout << "q:" << (*p)->q() << " pt:" << (*p)->pt() << " phi:" << (*p)->phi() << std::endl;
                 }
                 histo->Print();
+*/
 	}//End while next event.
 
         root_file.Write();
