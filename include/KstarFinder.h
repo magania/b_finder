@@ -55,8 +55,8 @@ private:
 
 	int index;
 
-	const static double MASS_KSTAR_MIN = 0.89166 - 10 * 0.0356; // Obtained from MC
-	const static double MASS_KSTAR_MAX = 0.89166 + 10 * 0.0356;
+	const static double MASS_KSTAR_MIN = 0.89166 - 4 * 0.0229466 //Obtained from Data
+	const static double MASS_KSTAR_MAX = 0.89166 + 4 * 0.0229466 // 0.0356 MC value
 
 	const static double KAON_MINIMUM_PT = 0.4;
 	const static double PION_MINIMUM_PT = 0.4;

@@ -86,8 +86,8 @@ private:
 	static const double PDG_PION_MASS = 0.13957018;
 	static const double PDG_MU_MASS = 0.1056583668;
 
-	static const double MASS_BD_MIN = 5.0;
-	static const double MASS_BD_MAX = 5.8;
+	static const double MASS_BD_MIN = 4.90;
+	static const double MASS_BD_MAX = 5.65;
 
     AA::PtlBox _boxp;
     AA::VrtBox _boxv;
@@ -112,7 +112,7 @@ private:
 	vector<double> v_pion_cpx, v_pion_cpy, v_pion_cpz;
 
 	/* -- Info missing by the savers -- */
-	double bd_mass, bd_mass_error, bd_pdl, bd_epdl, bd_ucpt, bd_ucptot;
+	double bd_mass, bd_mass_error, bd_mass_sw, bd_mass_error_sw, bd_pdl, bd_epdl, bd_ucpt, bd_ucptot;
     double mu_plus_dR, mu_minus_dR, kaon_dR, pion_dR;
 	double mu_plus_cpx, mu_plus_cpy, mu_plus_cpz;
 	double mu_minus_cpx, mu_minus_cpy, mu_minus_cpz;
@@ -122,7 +122,9 @@ private:
 	double bd_iso_pv, bd_iso_drmax_pv, bd_iso_75_pv;
 	double bd_jpsikn_chi2, bd_jpsipi_chi2;
 	double bd_angle_phi, bd_angle_ctheta, bd_angle_cpsi;
+	double bd_angle_phi_sw, bd_angle_ctheta_sw, bd_angle_cpsi_sw;
 	double kstar_mass_corrected, kstar_mass_corrected_error;
+	double kstar_mass_corrected_sw, kstar_mass_corrected_error_sw;
 	double mu_plus_cpt, mu_minus_cpt, kaon_cpt, pion_cpt, jpsi_cpt, kstar_cpt;
 
 //    double tree_jpsi_mass;

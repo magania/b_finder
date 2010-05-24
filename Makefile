@@ -35,7 +35,7 @@ FLAGS = $(ROOTCFLAGS) -m32
 
 MYLIBS = obj/DecayMC.o obj/BdJPsiKstarFinder.o obj/BdJPsiKstarMCFinder.o obj/BsJPsiPhiFinder.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/KstarFinder.o obj/VrtSaver.o obj/TagSaver.o obj/PtlFinder.o obj/BhhFinder.o obj/GammaFinder.o obj/UpsilonFinder.o obj/XYGammaFinder.o obj/PiGGFinder.o obj/ChiJPsiGFinder.o obj/BChiKFinder.o 
 FINDERS = bd_finder jpsi_finder jpsi_x hh_finder yp_finder pi_finder chi_finder bchi_finder b_jpsi_k_finder
-all: $(FINDERS);
+all: $(FINDERS)
 
 obj/%.o : src/%.cpp include/%.h
 	g++ -m32  $(INCLUDES) -g -o $@ -c $<
@@ -44,8 +44,8 @@ $(MYLIBS): obj/%.o : src/%.cpp include/%.h
 	g++ -m32 $(INCLUDES) -g -o $@ -c $<
 
 $(FINDERS): % : %.cpp $(MYLIBS) $(AATRACK)
-	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/%.o -c $<
-	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -g -o $@ obj/%.o $(MYLIBS) $(AATRACK)
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/$@.o -c $<
+	g++ -m32 $(FLAGS) $(INCLUDES) $(LIBS) -g -o $@ obj/$@.o $(MYLIBS) $(AATRACK)
 
 	
 bs_finder : bs_finder.cpp $(MYLIBS) $(AATRACK)

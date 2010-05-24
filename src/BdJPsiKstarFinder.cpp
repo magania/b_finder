@@ -21,6 +21,8 @@ BdJPsiKstarFinder::BdJPsiKstarFinder(JPsiFinder *jpsi, KstarFinder *kstar, TTree
 
 	tree.Branch("bd_mass", &bd_mass, "bd_mass/D");
 	tree.Branch("bd_mass_error", &bd_mass_error, "bd_mass_error/D");
+	tree.Branch("bd_mass_sw", &bd_mass_sw, "bd_mass_sw/D");
+	tree.Branch("bd_mass_error_sw", &bd_mass_error_sw, "bd_mass_error_sw/D");
 	tree.Branch("bd_pdl", &bd_pdl, "bd_pdl/D");
 	tree.Branch("bd_epdl", &bd_epdl, "bd_epdl/D");
 
@@ -45,6 +47,10 @@ BdJPsiKstarFinder::BdJPsiKstarFinder(JPsiFinder *jpsi, KstarFinder *kstar, TTree
 	tree.Branch("bd_angle_phi", &bd_angle_phi, "bd_angle_phi/D");
 	tree.Branch("bd_angle_ctheta", &bd_angle_ctheta, "bd_angle_ctheta/D");
 	tree.Branch("bd_angle_cpsi", &bd_angle_cpsi, "bd_angle_cpsi/D");
+	
+        tree.Branch("bd_angle_phi_sw", &bd_angle_phi_sw, "bd_angle_phi_sw/D");
+	tree.Branch("bd_angle_ctheta_sw", &bd_angle_ctheta_sw, "bd_angle_ctheta_sw/D");
+	tree.Branch("bd_angle_cpsi_sw", &bd_angle_cpsi_sw, "bd_angle_cpsi_sw/D");
 
 	tree.Branch("bd_iso", &bd_iso, "bd_iso/D");
 	tree.Branch("bd_iso_drmax", &bd_iso_drmax, "bd_iso_drmax/D");
@@ -58,6 +64,8 @@ BdJPsiKstarFinder::BdJPsiKstarFinder(JPsiFinder *jpsi, KstarFinder *kstar, TTree
 
 	tree.Branch("kstar_mass_corrected", &kstar_mass_corrected, "kstar_mass_corrected/D");
 	tree.Branch("kstar_mass_corrected_error", &kstar_mass_corrected_error, "kstar_mass_corrected_error/D");
+	tree.Branch("kstar_mass_corrected_sw", &kstar_mass_corrected_sw, "kstar_mass_corrected_sw/D");
+	tree.Branch("kstar_mass_corrected_error_sw", &kstar_mass_corrected_error_sw, "kstar_mass_corrected_error_sw/D");
 
     tree.Branch("bd_ucpt",      &bd_ucpt,      "bd_ucpt/D");
     tree.Branch("bd_ucptot",      &bd_ucptot,      "bd_ucptot/D");
@@ -295,6 +303,15 @@ if (mc_finder)
 	bd_mass = v_mb[index];
 	bd_mass_error = v_emb[index];
 
+        /* -- mass of Bs and uncertainty --*/
+         vector<PType> types(4);
+         types[0] = AA::MU_PLUS;
+         types[1] = AA::MU_MINUS;
+         types[2] = AA::PI_PLUS;
+         types[3] = AA::K_PLUS;
+         v_bd[index]->mass(types, bd_mass_sw, bd_mass_error_sw);
+         bd_mass_error_sw = sqrt(fabs(bd_mass_error_sw));
+
     /* -- dR -- */
     mu_plus_dR = v_muplus[index]->dR(v_bd_mom[index]);
     mu_minus_dR =  v_muminus[index]->dR(v_bd_mom[index]);
@@ -350,24 +367,31 @@ if (mc_finder)
 	bd_jpsipi_chi2 = v_jpsi_pi_vrt[index]->chi2();
 
 	/* -- Transversity Angles -- */
-	TLorentzVector l_kaon, l_pion, l_muplus, l_muminus;
+	TLorentzVector l_kaon, l_pion, l_muplus, l_muminus, l_kaon_sw, l_pion_sw;
 	l_muplus.SetXYZM (v_muplus_cpx[index], v_muplus_cpy[index], v_muplus_cpz[index], PDG_MU_MASS);
 	l_muminus.SetXYZM(v_muminus_cpx[index], v_muminus_cpy[index], v_muminus_cpz[index], PDG_MU_MASS);
 	l_kaon.SetXYZM  (v_kaon_cpx[index], v_kaon_cpy[index], v_kaon_cpz[index], PDG_KAON_MASS);
-	l_pion.SetXYZM (v_pion_cpx[index], v_pion_cpy[index], v_pion_cpz[index], PDG_KAON_MASS);
+	l_pion.SetXYZM (v_pion_cpx[index], v_pion_cpy[index], v_pion_cpz[index], PDG_PION_MASS);
+	l_kaon_sw.SetXYZM  (v_kaon_cpx[index], v_kaon_cpy[index], v_kaon_cpz[index], PDG_PION_MASS);
+	l_pion_sw.SetXYZM (v_pion_cpx[index], v_pion_cpy[index], v_pion_cpz[index], PDG_KAON_MASS);
 
 	threeAngles(l_muplus, l_muminus, l_kaon, l_pion, bd_angle_phi, bd_angle_ctheta, bd_angle_cpsi);
+	threeAngles(l_muplus, l_muminus, l_pion_sw, l_kaon_sw, bd_angle_phi_sw, bd_angle_ctheta_sw, bd_angle_cpsi_sw);
+        
 	/* -- Kstar corrected mass -- */
 	vector<PType> kstar_types(2);
-	double mkkC,vmkkC;
+	vector<PType> kstar_types_sw(2);
 	PtlLst kstar_list;
 	kstar_list.push_back(v_kaon[index]);
 	kstar_list.push_back(v_pion[index]);
 	kstar_types[0] = AA::K_PLUS;
 	kstar_types[1] = AA::PI_MINUS;
-	v_bd[index]->mass(kstar_types,mkkC,vmkkC,&kstar_list);
-	kstar_mass_corrected = mkkC;
-	kstar_mass_corrected_error = sqrt(fabs(vmkkC));
+	kstar_types_sw[0] = AA::PI_PLUS;
+	kstar_types_sw[1] = AA::K_MINUS;
+	v_bd[index]->mass(kstar_types,kstar_mass_corrected,kstar_mass_corrected_error,&kstar_list);
+	v_bd[index]->mass(kstar_types_sw,kstar_mass_corrected_sw,kstar_mass_corrected_error_sw,&kstar_list);
+	kstar_mass_corrected_error = sqrt(fabs(kstar_mass_corrected_error));
+	kstar_mass_corrected_error_sw = sqrt(fabs(kstar_mass_corrected_error_sw));
 
 	/* -- corrected pt and bd uncorrected pt -- */
     mu_plus_cpt = sqrt(v_muplus_cpx[index]*v_muplus_cpx[index] + v_muplus_cpy[index]*v_muplus_cpy[index]);
