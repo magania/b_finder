@@ -1,9 +1,9 @@
 #!/bin/bash
 
 EXE_FILE=/home/magania/Bd/finder/bd_finder
-META_ELIST=/work/tlaloc-clued0/magania/elists/jpsi_elist/meta_elist
-OUT_DIR=/prj_root/2677/ckm_write/magania/bd_unscaled
-LOCK_DIR=/prj_root/2677/ckm_write/magania/lock_bd/
+META_ELIST=/work/tlaloc-clued0/magania/elists/aadst_reprocessed/meta_elist
+OUT_DIR=/prj_root/2677/ckm_write/magania/bd_reprocessed
+LOCK_DIR=/prj_root/2677/ckm_write/magania/lock_bd
 RECOVER=bd.root
 RECOVER1=bd_elist
 
@@ -73,10 +73,9 @@ while [ true ];do
  MISSING=`ls -1 $OUT_DIR | grep $RECOVER | cut -d. -f3 | sort -n -u | awk '{while (n!=$1){print n++};n++ } END{while(n<'$n_meta_elist'){print n++}}'`
 #  echo $MISSING
  n_missing=`echo $MISSING | wc -w`
- echo Total $n_meta_elist Missing $n_missing
+ echo Missing $n_missing
 
- n_locks=`ls -1 $LOCK_DIR | wc -l`
- if [ "$n_missing" -lt "$n_locks" ] ; then  
+ if [ "$n_missing" -eq 0 ] ; then  
     break
  fi
 
@@ -115,12 +114,14 @@ return 1
 
 function copy_elist {
  get_mirror
- scp $MIRROR.fnal.gov:/work/$MIRROR/magania/elists/$ELIST elist
+ echo Copy ...
+ time cp $ELIST aadst
+ echo aadst > file
 }
 
 function do_task {
  echo "Working ..."
- ./aa_do e elist > aa.out
+ time ./aa_do f file > aa.out
 }
 
 function send_result {
