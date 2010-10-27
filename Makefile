@@ -33,8 +33,8 @@ LIBS = $(AALIBS) $(ROOTLIBS) -lm#-lg2c -lm
 FLAGS = $(ROOTCFLAGS) -m32 
 
 
-MYLIBS = obj/DecayMC.o obj/BdJPsiKstarFinder.o obj/BdJPsiKstarMCFinder.o obj/BsJPsiPhiFinder.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/KstarFinder.o obj/VrtSaver.o obj/TagSaver.o obj/PtlFinder.o obj/BhhFinder.o obj/GammaFinder.o obj/UpsilonFinder.o obj/XYGammaFinder.o obj/PiGGFinder.o obj/ChiJPsiGFinder.o obj/BChiKFinder.o 
-FINDERS = bd_finder jpsi_finder jpsi_x hh_finder yp_finder pi_finder chi_finder bchi_finder b_jpsi_k_finder
+MYLIBS = obj/DecayMC.o obj/BdJPsiKstarFinder.o obj/BdJPsiKstarMCFinder.o obj/BsJPsiPhiFinder.o obj/BsJPsiPhiMCFinder.o obj/JPsiFinder.o obj/EvtSaver.o obj/PtlSaver.o obj/PhiFinder.o obj/KstarFinder.o obj/VrtSaver.o obj/TagSaver.o obj/PtlFinder.o obj/BhhFinder.o obj/GammaFinder.o obj/UpsilonFinder.o obj/XYGammaFinder.o obj/PiGGFinder.o obj/ChiJPsiGFinder.o obj/BChiKFinder.o obj/D0Finder.o obj/BMuD0XFinder.o
+FINDERS = bd_finder jpsi_finder jpsi_x hh_finder yp_finder pi_finder chi_finder bchi_finder b_jpsi_k_finder b_muD0X_finder
 all: $(FINDERS)
 
 obj/%.o : src/%.cpp include/%.h

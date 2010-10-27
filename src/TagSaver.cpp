@@ -59,7 +59,7 @@ TagSaver::~TagSaver(){
 void TagSaver::fill(const HepVector &v, const AA::Vrt *pv, const AA::PtlLst *plst, double ptcut){
   tagComb.fill (v,pv,plst,ptcut);
   //Old Tagging
-  dilution = tagComb.value();
+  dilution = tagComb.dilution();
   dilution_defined = tagComb.defined();
   //New Tagging
   newtag_ost_defined              = tagComb.tagOpposite()->defined();
@@ -81,20 +81,21 @@ void TagSaver::fill(const HepVector &v, const AA::Vrt *pv, const AA::PtlLst *pls
   newtag_SST_eventCharge_defined  = tagComb.tagEventCharge()->defined();//
 
   newtag_ost              = tagComb.tagOpposite()->dilution();
-  newtag_muon             = tagComb.tagOpposite()->muon()->dilution();//
-  newtag_electron         = tagComb.tagOpposite()->electron()->dilution();//
-  newtag_electronJet      = tagComb.tagOpposite()->electronJet()->dilution();//
-  newtag_electronSVCharge = tagComb.tagOpposite()->electronSVCharge()->dilution();//
-  newtag_muonJet          = tagComb.tagOpposite()->muonJet()->dilution();//Muon's jet charge
-  newtag_muonPtRel        = tagComb.tagOpposite()->muonPtRel()->dilution();//
-  newtag_muonSVCharge     = tagComb.tagOpposite()->muonSVCharge()->dilution();//
-  newtag_svCharge         = tagComb.tagOpposite()->svCharge()->dilution();//
-  newtag_sv_Pt            = tagComb.tagOpposite()->sv_Pt()->dilution();//
-  newtag_Opp_eventCharge  = tagComb.tagOpposite()->eventCharge()->dilution();//
+
+  newtag_muon             = tagComb.tagOpposite()->muon()->value();//
+  newtag_electron         = tagComb.tagOpposite()->electron()->value();//
+  newtag_electronJet      = tagComb.tagOpposite()->electronJet()->value();//
+  newtag_electronSVCharge = tagComb.tagOpposite()->electronSVCharge()->value();//
+  newtag_muonJet          = tagComb.tagOpposite()->muonJet()->value();//Muon's jet charge
+  newtag_muonPtRel        = tagComb.tagOpposite()->muonPtRel()->value();//
+  newtag_muonSVCharge     = tagComb.tagOpposite()->muonSVCharge()->value();//
+  newtag_svCharge         = tagComb.tagOpposite()->svCharge()->value();//
+  newtag_sv_Pt            = tagComb.tagOpposite()->sv_Pt()->value();//
+  newtag_Opp_eventCharge  = tagComb.tagOpposite()->eventCharge()->value();//
   //tagSame
   newtag_sst               = tagComb.tagSame()->dilution();
-  newtag_minDeltaR        = tagComb.tagSame()->minDeltaR()->dilution();//
-  newtag_QjetPt           = tagComb.tagSame()->QjetPt()->dilution();//Jet charge weighted with Pt
+  newtag_minDeltaR        = tagComb.tagSame()->minDeltaR()->value();//
+  newtag_QjetPt           = tagComb.tagSame()->QjetPt()->value();//Jet charge weighted with Pt
   //tagEventCharge
   newtag_SST_eventCharge  = tagComb.tagEventCharge()->dilution();//
 

@@ -68,6 +68,14 @@ void params() {
 	AA::blocksOut.clear();
 
 	AA::tuneImpact = false;
+
+	// :)
+	AA::findPVFlag = true;
+	AA::findV0Flag = true;
+	AA::findCascadeFlag = false;
+	AA::findJetsFlag = true;
+	AA::findJPsiFlag = true;
+	AA::findSVFlag = true;
 }
 
 void start_ana(int argc, char** argv) {
