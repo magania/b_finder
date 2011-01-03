@@ -60,6 +60,8 @@ public:
 private:
 	void clean();
 
+        static const double PDG_B_MASS = 5.27917;
+
         static const int MUON_NSEG_MIN = 3;
         static const double PT_MU_MIN = 2.0;
         static const double PTOT_MU_MIN = 3.0;
@@ -101,7 +103,7 @@ private:
 	std::vector<double> v_mdstar;
 
 	/* -- Info missing by the savers -- */
-	double dstar_mass, b_dl, b_vdl, d0_dl, d0_vdl;
+	double dstar_mass, b_dl, b_vdl, d0_dl, d0_vdl, b_pdl, b_epdl;
 };
 
 #endif /* BMUD0XFINDER_H_ */

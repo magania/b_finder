@@ -64,7 +64,7 @@ int D0Finder::find(){
 			if (!AA::findVrt((*p1), (*p2), &vrt))
 				continue;
 
-                        if (vrt.chi2() < VRT_CHI2_MIN)
+                        if (vrt.chi2() > VRT_CHI2_MIN)
                                 continue;
 
 			//Construct new particle from these 2 tracks
