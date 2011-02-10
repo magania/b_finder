@@ -17,6 +17,7 @@
 #include <PtlFinder.h>
 #include <D0Finder.h>
 #include <TagSaver.h>
+#include <DecayMC.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,6 +35,8 @@
 #include <select.hpp>
 #include <Monitor.hpp>
 #include <V0Finder.hpp>
+
+#include <PtlMC.hpp>
 
 #include <TTree.h>
 #include <TFile.h>
@@ -60,7 +63,15 @@ public:
 private:
 	void clean();
 
-        static const double PDG_B_MASS = 5.27917;
+	bool matchD0Sm(PtlMC* p, PtlMC* kaonMC, PtlMC* pionMC, PtlMC* dpionMC);
+	bool matchD0Star(PtlMC* p, PtlMC* kaonMC, PtlMC* pionMC);
+	bool matchD0(PtlMC* p, PtlMC* kaonMC, PtlMC* pionMC);
+	void printChain(PtlMC* p);
+
+
+        static const double PDG_BP_MASS = 5.27917;
+        static const double PDG_B0_MASS = 5.27950;
+        static const double PDG_BS_MASS = 5.36630;
 
         static const int MUON_NSEG_MIN = 3;
         static const double PT_MU_MIN = 2.0;
@@ -72,7 +83,7 @@ private:
         static const double PI_K_CHI2VRT_MIN = 2.0;
 
         static const double COSXY_D0_MIN = 0.9;
-        static const double COSXY_B_MIN = 0.95;
+        static const double COSXY_B_MIN = 0.9;
         static const double SIGMA_B_LXY = 9.0;
         static const double SIGMA_D0_LXY = 9.0;
 
@@ -98,12 +109,14 @@ private:
 	VrtSaver vp_saver;
 	TagSaver tag_saver;
 
-	std::vector<int> v_d0_index, v_mu_index;
+	std::vector<int> v_d0_index, v_mu_index, v_pi_index;
 	std::vector<AA::Ptl*> v_b;
 	std::vector<double> v_mdstar;
 
 	/* -- Info missing by the savers -- */
 	double dstar_mass, b_dl, b_vdl, d0_dl, d0_vdl, b_pdl, b_epdl;
+        int mc_b, mc_d, mc_dc, mc_dmatch, mc_smatch, mc_mmatch;
+	double mc_K, mc_L, mc_ct;
 };
 
 #endif /* BMUD0XFINDER_H_ */

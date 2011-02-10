@@ -26,6 +26,16 @@ BMuD0XFinder::BMuD0XFinder(TTree &tree, D0Finder &D0, PtlFinder &pion, PtlFinder
 	tree.Branch("b_epdl",  &b_epdl,  "b_epdl/D");
 	tree.Branch("d0_dl", &d0_dl, "d0_dl/D");
 	tree.Branch("d0_vdl", &d0_vdl, "d0_vdl/D");
+
+        tree.Branch("mc_K", &mc_K, "mc_K/D");
+        tree.Branch("mc_L", &mc_L, "mc_L/D");
+        tree.Branch("mc_ct", &mc_ct, "mc_ct/D");
+        tree.Branch("mc_b", &mc_b, "mc_b/I");
+        tree.Branch("mc_d", &mc_d, "mc_d/I");
+        tree.Branch("mc_dc", &mc_dc, "mc_dc/I");
+        tree.Branch("mc_dmatch", &mc_dmatch, "mc_dmatch/I");
+        tree.Branch("mc_smatch", &mc_smatch, "mc_smatch/I");
+        tree.Branch("mc_mmatch", &mc_mmatch, "mc_mmatch/I");
 }
 
 BMuD0XFinder::~BMuD0XFinder() {
@@ -37,6 +47,7 @@ void BMuD0XFinder::clean(){
 
         v_d0_index.clear();
 	v_mu_index.clear();
+	v_pi_index.clear();
         v_b.clear();
 	v_mdstar.clear();
 }
@@ -82,7 +93,7 @@ int BMuD0XFinder::find(){
    		        if (!d0->associateToVrt(&AA::vrtPBox) || d0->primaryVertex() != muon->primaryVertex())
   		            continue;
 
-                        if (d0->cosXY() < COSXY_D0_MIN)
+                        if (fabs(d0->cosXY()) < COSXY_D0_MIN)
                             continue;
 
 //                        std::cout << "First Cuts" << std::endl;
@@ -106,13 +117,13 @@ int BMuD0XFinder::find(){
                        if (b_vrt->chi2() > CHI2_BVRT_MIN ) continue;
 //                      std::cout << "First Cuts 1" << std::endl;
 
-                        double blxy,bvlxy;
-                        b_vrt->distanceXY(muon->primaryVertex(),blxy,bvlxy);
-                        if (blxy*blxy > d0lxy*d0lxy) continue;
-                        
+//                        double blxy,bvlxy;
+//                        b_vrt->distanceXY(muon->primaryVertex(),blxy,bvlxy);
+//                        if (blxy*blxy > d0lxy*d0lxy) continue;
+
                         double bdlxy,bdvlxy;
                         d0->decayVertex()->distanceXY(b_vrt,bdlxy,bdvlxy);
-                        if ( bdlxy*bdlxy < SIGMA_D0_LXY*bdvlxy ) continue;
+                        if ( bdlxy*bdlxy > SIGMA_D0_LXY*bdvlxy ) continue;
 
                       /* -- Construct new particle B from these 2 tracks -- */
                         AA::Ptl* b = _boxp.newPtl();
@@ -137,11 +148,11 @@ int BMuD0XFinder::find(){
    		    if (!b->associateToVrt(&AA::vrtPBox) || muon->primaryVertex() != b->primaryVertex())
   		          continue;
 
-                    if (b->cosXY() < COSXY_B_MIN)
-                         continue;
+//                    if (fabs(b->cosXY()) < COSXY_B_MIN)
+//                         continue;
 
-                    bool dstarFound = false;
                     double dstarMass = -1.0;
+                    int piFinderIndex = 0;
 		    _pi_finder->begin();
                     while(_pi_finder->next()){
 			AA::Ptl* dpion = &_pi_finder->getPtl();
@@ -184,7 +195,10 @@ int BMuD0XFinder::find(){
                         if ( mdiff < MASS_DSmD0_MIN || MASS_DSmD0_MAX < mdiff)
                            continue;
 
-                        dstarFound = true;
+			if (dstarMass != -1.0 && TMath::Abs(mDst - 2010.25) > TMath::Abs(dstarMass - 2010.25))
+    			   continue;
+	
+			piFinderIndex = _pi_finder->getIndex();
                         dstarMass = mDst;
                     }
 
@@ -194,6 +208,7 @@ int BMuD0XFinder::find(){
 
 		    v_d0_index.push_back(_d0_finder->getIndex());
 		    v_mu_index.push_back(_mu_finder->getIndex());
+		    v_pi_index.push_back(piFinderIndex);
 
 		    v_b.push_back(b);
 		    v_mdstar.push_back(dstarMass);
@@ -224,9 +239,11 @@ void BMuD0XFinder::fill(){
 //    std::cout << "Filling: " << index << " B:" << v_b[index] << " mu:" << v_mu_index[index] << std::endl;
 	_d0_finder->setIndex(v_d0_index[index]);
 	_mu_finder->setIndex(v_mu_index[index]);
+	_pi_finder->setIndex(v_pi_index[index]);
 
 	_d0_finder->fill();
 	_mu_finder->fill();
+	_pi_finder->fill();
 	b_saver.fill(*v_b[index]);
 	vb_saver.fill(*v_b[index]->decayVertex());  // B vertex info.
 	vp_saver.fill(*v_b[index]->primaryVertex());    // Primary vertex info.
@@ -243,9 +260,171 @@ void BMuD0XFinder::fill(){
         particle_list.push_back(&_mu_finder->getPtl());
  
         double ctau, vctau;
- 	v_b[index]->decayLengthProper(PDG_B_MASS, ctau, vctau, &particle_list);
+ 	v_b[index]->decayLengthProper(PDG_BP_MASS, ctau, vctau, &particle_list);
 	b_pdl = ctau; b_epdl=sqrt(fabs(vctau));
+//	cout << "L = " << b_pdl << endl;
 
         tag_saver.fill(v_b[index]->mom(), v_b[index]->primaryVertex(), &particle_list);  // Tagging info.
+
+//	cout << "MC Fill" << endl;
+	mc_dc = -1;
+	mc_b = -1;
+	mc_d = -1;
+	mc_L = -10;
+	mc_ct = -10;
+
+#ifdef MC
+	cout << "MC Fill" << endl;
+	Ptl* muon = &_mu_finder->getPtl();
+	Ptl* kaon = &_d0_finder->getKaon();
+	Ptl* pion = &_d0_finder->getPion();
+	Ptl* dpion = &_pi_finder->getPtl();
+
+//	cout << muon << " " << kaon << " " << pion << endl;
+
+        PtlMC* muonMC, *kaonMC, *pionMC, *dpionMC;
+	double chi;
+
+	muonMC = DecayMC::imatch(muon,chi);
+	kaonMC = DecayMC::imatch(kaon,chi);
+	pionMC = DecayMC::imatch(pion,chi);
+	dpionMC = DecayMC::imatch(dpion,chi);
+
+//	cout << muonMC << " " << kaonMC << " " << pionMC << endl;
+	if ( !muonMC )
+		return;	
+
+        PtlMC* bMC = DecayMC::getParent(muonMC);
+	mc_b = bMC->idPDG();
+	cout << "** ";
+	printChain(bMC);
+	cout << endl;
+
+	if (bMC && kaonMC && pionMC && muonMC)
+	{
+	        double px = kaonMC->mom4(1) + pionMC->mom4(1) + muonMC->mom4(1);
+	        double py = kaonMC->mom4(2) + pionMC->mom4(2) + muonMC->mom4(2);
+	        double ptMuD0 = TMath::Sqrt(px*px+py*py);
+
+	        mc_K = ptMuD0/bMC->pt();
+//		cout << "ptB = " << bMC->pt() << "   ptMuD0 = " << ptMuD0 << "   K = " << mc_K << endl;
+		VrtMC *vStart = bMC->vrtStart();
+		VrtMC *vEnd = bMC->vrtEnd();
+
+//		cout << vStart->x() << endl << vEnd->x()<< endl;
+		double lx = vEnd->x(1) - vStart->x(1);
+		double ly = vEnd->x(2) - vStart->x(2);
+		
+		if ( bMC->idPDG() == 521){
+			mc_L  = PDG_BP_MASS*(lx*px+ly*py)/ptMuD0/ptMuD0;
+			mc_ct = PDG_BP_MASS*(lx*bMC->mom4(1)+ly*bMC->mom4(2))/bMC->pt()/bMC->pt();
+		}
+		if ( bMC->idPDG() == 511){
+			mc_L  = PDG_B0_MASS*(lx*px+ly*py)/ptMuD0/ptMuD0;
+			mc_ct = PDG_B0_MASS*(lx*bMC->mom4(1)+ly*bMC->mom4(2))/bMC->pt()/bMC->pt();
+		}
+		if ( bMC->idPDG() == 531){
+			mc_L  = PDG_BS_MASS*(lx*px+ly*py)/ptMuD0/ptMuD0;
+			mc_ct = PDG_BS_MASS*(lx*bMC->mom4(1)+ly*bMC->mom4(2))/bMC->pt()/bMC->pt();
+		}
+
+//		cout << "L = (" << lx <<","<< lx << ")  mc_L = " << mc_L << endl;
+	} else {
+		mc_K = -1.0;
+//		cout << "K = " << -1.0 << endl;
+	}
+
+	mc_dmatch = matchD0(bMC,kaonMC,pionMC);
+	mc_smatch = matchD0Star(bMC,kaonMC,pionMC);
+	mc_mmatch = matchD0Sm(bMC,kaonMC,pionMC,dpionMC);
+
+
+	mc_dc = 0;
+        PtlMCLst child_list = bMC->vrtEnd()->children();
+        for (PtlMCLstCIt c = child_list.begin(); c != child_list.end(); ++c) 
+	{
+		mc_dc++;
+		if ( (*c)->idPDG() == -13 )
+			continue;
+		if ( (*c)->idPDG() == 14 )
+			continue;
+		if ( matchD0((*c),kaonMC,pionMC) ){
+			mc_d = (*c)->idPDG();
+			continue;
+		}
+	}
+
+	cout << "dmatch:" << mc_dmatch << "  smatch:" << mc_smatch << "  mmatch:" << mc_mmatch << "  b:" << mc_b << "  d:" << mc_d << "  dc:" << mc_dc << endl;
+#endif
+}
+
+bool BMuD0XFinder::matchD0Sm(PtlMC* p, PtlMC* kaonMC, PtlMC* pionMC, PtlMC* dpionMC)
+{
+        PtlMC *chD0, *chdPion, *chKaon, *chPion;
+	if ( p->idPDG() == -413 &&
+		 DecayMC::asignChildren(p, -421, &chD0, -211, &chdPion) &&
+                 DecayMC::asignChildren(chD0, 321, &chKaon, -211, &chPion) &&
+                 chKaon == kaonMC &&
+                 chPion == pionMC &&
+                 chdPion == dpionMC )
+		return true;
+        if ( p->vrtEnd() ){
+                PtlMCLst child = p->vrtEnd()->children();
+                for (PtlMCLstCIt c = child.begin(); c != child.end(); ++c)
+                        if ( matchD0Sm((*c),kaonMC,pionMC,dpionMC) )
+                                return true;
+        }
+        return false;
+}
+
+bool BMuD0XFinder::matchD0Star(PtlMC* p, PtlMC* kaonMC, PtlMC* pionMC)
+{
+        PtlMC *chD0, *chPiOrGamma, *chKaon, *chPion;
+	if ( p->idPDG() == -423 && 
+		 (DecayMC::asignChildren(p, -421, &chD0, 111, &chPiOrGamma) || DecayMC::asignChildren(p, -421, &chD0, 22, &chPiOrGamma)) &&
+	         DecayMC::asignChildren(chD0, 321, &chKaon, -211, &chPion) &&
+                 chKaon == kaonMC &&
+                 chPion == pionMC )
+		return true;
+        if ( p->vrtEnd() ){
+                PtlMCLst child = p->vrtEnd()->children();
+                for (PtlMCLstCIt c = child.begin(); c != child.end(); ++c)
+                        if ( matchD0Star((*c),kaonMC,pionMC) )
+                                return true;
+        }
+        return false;
+}
+
+bool BMuD0XFinder::matchD0(PtlMC* p, PtlMC* kaonMC, PtlMC* pionMC)
+{
+        PtlMC *chKaon, *chPion;
+	if ( p->idPDG() == -421  &&
+		 DecayMC::asignChildren(p, 321, &chKaon, -211, &chPion)  &&
+		 chKaon == kaonMC &&
+		 chPion == pionMC )
+		return true;
+	if ( p->vrtEnd() ){
+		PtlMCLst child = p->vrtEnd()->children();
+	        for (PtlMCLstCIt c = child.begin(); c != child.end(); ++c)
+			if ( matchD0((*c),kaonMC,pionMC) )
+				return true;
+	}
+	return false;
+}
+
+void BMuD0XFinder::printChain(PtlMC* p)
+{
+	cout << DecayMC::getIdPdg(p);
+	if ( p->vrtEnd() )
+	{
+		cout << "[";
+        	PtlMCLst child = p->vrtEnd()->children();
+                for (PtlMCLstCIt c = child.begin(); c != child.end(); ++c)
+			printChain(*c);
+		cout << "] ";
+	} else {
+		cout << " ";
+	}
+	
 }
 
