@@ -1,6 +1,6 @@
 AA=../aatrack/AA
 #AA=/home/magania/.yp/aatrack/AA
-DFLAGS=P21
+DFLAGS=MC
 #----------------- aatrack ---------------
 #AAMC=/home/magania/Bs/aatrack/P17/AA
 #AA17=/home/magania/Bs/aatrack/P17/AA
@@ -41,7 +41,7 @@ obj/%.o : src/%.cpp include/%.h
 	g++ -m32  $(INCLUDES) -g -o $@ -c $<
 
 $(MYLIBS): obj/%.o : src/%.cpp include/%.h
-	g++ -m32 $(INCLUDES) -g -o $@ -c $<
+	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o $@ -c $<
 
 $(FINDERS): % : %.cpp $(MYLIBS) $(AATRACK)
 	g++ -m32 $(INCLUDES) -D$(DFLAGS) -g -o obj/$@.o -c $<
