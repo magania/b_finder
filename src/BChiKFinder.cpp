@@ -46,7 +46,7 @@ int BChiKFinder::find(){
 			Ptl* chi = &_chi_finder->getChi();
 			Ptl* jpsi = &_chi_finder->getJPsi();
 			Ptl* mu_plus = &_chi_finder->getMuPlus();
-			Ptl* mu_minus = &_chi_finder->getJPsi();
+			Ptl* mu_minus = &_chi_finder->getMuMinus();
 			Ptl* gamma = &_chi_finder->getGamma();
 			Ptl* e_plus = &_chi_finder->getEPlus();
 			Ptl* e_minus = &_chi_finder->getEMinus();

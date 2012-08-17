@@ -164,19 +164,19 @@ void BhhFinder::fill(){
 	PtlMC* h_plus_mc, *h_minus_mc;
 	h_plus_mc = DecayMC::imatch(&getHPlus(),chi);
 	h_minus_mc = DecayMC::imatch(&getHMinus(),chi);
-	mc_hplus_ptr = (int)h_plus_mc; mc_hminus_ptr = (int)h_minus_mc;
+	//mc_hplus_ptr = (int)h_plus_mc; mc_hminus_ptr = (int)h_minus_mc;
 	mc_hplus_id = DecayMC::getIdPdg(h_plus_mc); mc_hminus_id = DecayMC::getIdPdg(h_minus_mc);
 
 	PtlMC* h_plus_p_mc, *h_minus_p_mc;
 	h_plus_p_mc = DecayMC::getParent(h_plus_mc);
 	h_minus_p_mc = DecayMC::getParent(h_minus_mc);
-	mc_hplus_p_ptr = (int) h_plus_p_mc; mc_hminus_p_ptr = (int)h_minus_p_mc;
+	//mc_hplus_p_ptr = (int) h_plus_p_mc; mc_hminus_p_ptr = (int)h_minus_p_mc;
 	mc_hplus_p_id = DecayMC::getIdPdg(h_plus_p_mc); mc_hminus_p_id = DecayMC::getIdPdg(h_minus_p_mc);
 
 	PtlMC* h_plus_pp_mc, *h_minus_pp_mc;
 	h_plus_pp_mc = DecayMC::getParent(h_plus_p_mc);
 	h_minus_pp_mc = DecayMC::getParent(h_minus_p_mc);
-	mc_hplus_pp_ptr = (int) h_plus_pp_mc; mc_hminus_pp_ptr = (int)h_minus_p_mc;
+	//mc_hplus_pp_ptr = (int) h_plus_pp_mc; mc_hminus_pp_ptr = (int)h_minus_p_mc;
 	mc_hplus_pp_id = DecayMC::getIdPdg(h_plus_pp_mc); mc_hminus_pp_id = DecayMC::getIdPdg(h_minus_p_mc);
 
 }
