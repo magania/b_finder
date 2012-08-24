@@ -62,7 +62,7 @@ private:
 
 	int index;
 
-	static const double MASS_GAMMA_MAX = 0.100;
+	static const double MASS_GAMMA_MAX = 0.05;
 
 	static const double R_ORIGIN_MIN = 0.1;
 	static const double R_ORIGIN_MAX = 15.0;

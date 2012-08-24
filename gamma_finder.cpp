@@ -1,7 +1,7 @@
 /*
- * up_finder.cpp
+ * gamma_finder.cpp
  *
- *  Created on: Aug 26, 2009
+ *  Created on: Aug 21, 2012
  *      Author: magania
  */
 
@@ -24,9 +24,7 @@
 #include <TFile.h>
 
 #include "EvtSaver.h"
-#include "UpsilonFinder.h"
 #include "GammaFinder.h"
-#include "XYGammaFinder.h"
 
 void params() {
 	//Parameters for Real Data and MC
@@ -72,7 +70,7 @@ bool nextEvent() {
 
 void usage(void) {
     printf("\n");
-    printf("\033[1mUsage: up_finder [options].\033[m \n");
+    printf("\033[1mUsage: gamma_finder [options].\033[m \n");
     printf("options:\n");
     printf("\t \033[1m-i\033[m input_file \t Set the file to process.\n\n");
     printf("\t \033[1m--mc\033[m        \t Process MC events.\n");
@@ -146,7 +144,7 @@ int main(int argc, char** argv) {
 
 /* ================================        MAIN       ===================================*/
 	/* -- We will save all in this tree --*/
-	TFile root_file("yp.root", "RECREATE");
+	TFile root_file("gamma.root", "RECREATE");
 	TTree tree("tree", "all info.");
 	TTree *treeMC=0;
 
@@ -155,9 +153,7 @@ if (mc)
 	EvtSaver evt_saver(tree);
 
 	//BhhFinder hh_finder(tree);
-	UpsilonFinder upsilon_finder(tree);
 	GammaFinder gamma_finder(tree);
-	XYGammaFinder xyg_finder(tree, upsilon_finder, gamma_finder);
 
 	/* -- Initilization of geometry, field and beam spot.
 	 * Should be done after the fileLst or eventLst initilization -- */
@@ -177,19 +173,15 @@ if (mc)
         //std::cout << "Run:" << AA::runNumber << " Evt: "  << AA::evtNumber << std::endl;
 
 		p_events++;
-		if (!upsilon_finder.find())
-			continue;
 		if (!gamma_finder.find())
 			continue;
-		if (!xyg_finder.find())
-			continue;
-		while (xyg_finder.next()){
+		while (gamma_finder.next()){
 //			std::cout << xyg_finder.getMass() << ' ' << std::endl;
-			xyg_finder.fill();
+			gamma_finder.fill();
 			evt_saver.fill();
 			tree.Fill();
 		}
-		AA::dst.outEventLst("yp_elist");
+		AA::dst.outEventLst("gamma_elist");
 	}//End while next event.
 
 	tree.Write();
@@ -198,6 +190,6 @@ if (mc)
 
 	root_file.Write();
 	root_file.Close();
-	std::cout << argv[0] << " II: up_finder ended. " << p_events << " events seen."<< std::endl;
+	std::cout << argv[0] << " II: gamma_finder ended. " << p_events << " events seen."<< std::endl;
 	std::exit(EXIT_SUCCESS);
 }

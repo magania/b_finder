@@ -1,7 +1,7 @@
 /*
- * up_finder.cpp
+ * upsilon_finder.cpp
  *
- *  Created on: Aug 26, 2009
+ *  Created on: Aug 21, 2012
  *      Author: magania
  */
 
@@ -25,8 +25,6 @@
 
 #include "EvtSaver.h"
 #include "UpsilonFinder.h"
-#include "GammaFinder.h"
-#include "XYGammaFinder.h"
 
 void params() {
 	//Parameters for Real Data and MC
@@ -146,7 +144,7 @@ int main(int argc, char** argv) {
 
 /* ================================        MAIN       ===================================*/
 	/* -- We will save all in this tree --*/
-	TFile root_file("yp.root", "RECREATE");
+	TFile root_file("upsilon.root", "RECREATE");
 	TTree tree("tree", "all info.");
 	TTree *treeMC=0;
 
@@ -154,10 +152,7 @@ if (mc)
 	treeMC = new TTree("treeMC", "all mc info.");
 	EvtSaver evt_saver(tree);
 
-	//BhhFinder hh_finder(tree);
 	UpsilonFinder upsilon_finder(tree);
-	GammaFinder gamma_finder(tree);
-	XYGammaFinder xyg_finder(tree, upsilon_finder, gamma_finder);
 
 	/* -- Initilization of geometry, field and beam spot.
 	 * Should be done after the fileLst or eventLst initilization -- */
@@ -170,26 +165,22 @@ if (mc)
 
 	unsigned long p_events = 0;
 	while (nextEvent()) {
+		p_events++;
 		AA::setField(); //define beam-spot and field value
 		AA::spot.set();
 		AA::analyse();
 		AA::select(AA::TAG);
         //std::cout << "Run:" << AA::runNumber << " Evt: "  << AA::evtNumber << std::endl;
 
-		p_events++;
 		if (!upsilon_finder.find())
 			continue;
-		if (!gamma_finder.find())
-			continue;
-		if (!xyg_finder.find())
-			continue;
-		while (xyg_finder.next()){
+		while (upsilon_finder.next()){
 //			std::cout << xyg_finder.getMass() << ' ' << std::endl;
-			xyg_finder.fill();
+			upsilon_finder.fill();
 			evt_saver.fill();
 			tree.Fill();
 		}
-		AA::dst.outEventLst("yp_elist");
+		AA::dst.outEventLst("upsilon_elist");
 	}//End while next event.
 
 	tree.Write();
@@ -198,6 +189,6 @@ if (mc)
 
 	root_file.Write();
 	root_file.Close();
-	std::cout << argv[0] << " II: up_finder ended. " << p_events << " events seen."<< std::endl;
+	std::cout << argv[0] << " II: upsilon_finder ended. " << p_events << " events seen."<< std::endl;
 	std::exit(EXIT_SUCCESS);
 }

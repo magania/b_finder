@@ -1,7 +1,7 @@
 /*
- * up_finder.cpp
+ * pi0_finder.cpp
  *
- *  Created on: Aug 26, 2009
+ *  Created on: Aug 22, 2012
  *      Author: magania
  */
 
@@ -24,9 +24,8 @@
 #include <TFile.h>
 
 #include "EvtSaver.h"
-#include "UpsilonFinder.h"
 #include "GammaFinder.h"
-#include "XYGammaFinder.h"
+#include "PiGGFinder.h"
 
 void params() {
 	//Parameters for Real Data and MC
@@ -72,7 +71,7 @@ bool nextEvent() {
 
 void usage(void) {
     printf("\n");
-    printf("\033[1mUsage: up_finder [options].\033[m \n");
+    printf("\033[1mUsage: pi0_finder [options].\033[m \n");
     printf("options:\n");
     printf("\t \033[1m-i\033[m input_file \t Set the file to process.\n\n");
     printf("\t \033[1m--mc\033[m        \t Process MC events.\n");
@@ -146,7 +145,7 @@ int main(int argc, char** argv) {
 
 /* ================================        MAIN       ===================================*/
 	/* -- We will save all in this tree --*/
-	TFile root_file("yp.root", "RECREATE");
+	TFile root_file("pi0.root", "RECREATE");
 	TTree tree("tree", "all info.");
 	TTree *treeMC=0;
 
@@ -154,10 +153,8 @@ if (mc)
 	treeMC = new TTree("treeMC", "all mc info.");
 	EvtSaver evt_saver(tree);
 
-	//BhhFinder hh_finder(tree);
-	UpsilonFinder upsilon_finder(tree);
 	GammaFinder gamma_finder(tree);
-	XYGammaFinder xyg_finder(tree, upsilon_finder, gamma_finder);
+	PiGGFinder pi0_finder(tree,gamma_finder);
 
 	/* -- Initilization of geometry, field and beam spot.
 	 * Should be done after the fileLst or eventLst initilization -- */
@@ -177,19 +174,16 @@ if (mc)
         //std::cout << "Run:" << AA::runNumber << " Evt: "  << AA::evtNumber << std::endl;
 
 		p_events++;
-		if (!upsilon_finder.find())
+		if (!pi0_finder.find())
 			continue;
-		if (!gamma_finder.find())
-			continue;
-		if (!xyg_finder.find())
-			continue;
-		while (xyg_finder.next()){
+		while (pi0_finder.next()){
 //			std::cout << xyg_finder.getMass() << ' ' << std::endl;
-			xyg_finder.fill();
+			pi0_finder.fill();
 			evt_saver.fill();
 			tree.Fill();
 		}
-		AA::dst.outEventLst("yp_elist");
+		AA::dst.outEventLst("pi0_elist");
+
 	}//End while next event.
 
 	tree.Write();
@@ -198,6 +192,6 @@ if (mc)
 
 	root_file.Write();
 	root_file.Close();
-	std::cout << argv[0] << " II: up_finder ended. " << p_events << " events seen."<< std::endl;
+	std::cout << argv[0] << " II: pi0_finder ended. " << p_events << " events seen."<< std::endl;
 	std::exit(EXIT_SUCCESS);
 }
